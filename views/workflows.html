@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html ng-app="workflowApp" lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <!-- Meta, title, CSS, favicons, etc. -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Bootstrap core CSS -->
+  <!--<link rel="stylesheet" href="stylesheets/select2.min.css">-->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="stylesheets/angular-notify.min.css">
+  <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">-->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="stylesheets/style.css">
+  <link rel="stylesheet" href="stylesheets/fileinput.min.css">
+  <link rel="stylesheet" href="stylesheets/jquery-confirm.css">
+ 
+  <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+</head>
+<body ng-controller="workflow" style="background: #43617E">
+    <nav class = "nav-bar navbar-nav" style="background-color: #50ABCD; float:none;margin:0 auto;display: block;text-align: center;">
+        <img class="small" src="images/smartsheetlogo.png" style="float: left; margin-left: 10px; width: 10%; height: 5%; ">
+        <a href="/workflows" class="navbar-brand ml-4" style="color: white">  Interface Primavera P6 Smartsheet  </a>
+        <!--
+        <a href="javascript:;" class="user-profile dropdown-toggle float-right mr-4 mt-2" style="color: white" data-toggle="dropdown" aria-expanded="false">
+            Hello, {{nombre_usuario}}
+        </a>
+        
+            <ul class="dropdown-menu dropdown-usermenu animated fadeInDown">               
+            <li>
+                <a href="./login" class="pull-right mr-4">Log out  <i class="fas fa-sign-out-alt"></i></a>
+                <a href="./users" class="pull-right mr-4">manage users  <i class="fas fa-users-cog"></i></a>
+            </li>
+        </ul>
+        -->
+        <img class="small" src="images/systeclogo.png" style="float: right; margin-right: 10px; width: 10%; height: 5%; ">
+        <li class="nav-item dropdown float-right mr-5">
+            <a class="nav-link dropdown-toggle" style="color: white" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Hello, {{nombre_usuario}}
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="./users" ng-if="permisos.administrar_usuarios == 1">Manage users</a>
+                <a class="dropdown-item" href="./workflows" >Project workflows</a>
+                <a class="dropdown-item" href="./workflowsP" >Portafolio workflows</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="./login">Log out</a>
+            </div>
+        </li>
+        
+    </nav>
+    <div class="container" id="container">
+        <!--          
+        <div class="row">
+            <ul class="nav justify-content-center">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">Active</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Link</a>
+                </li>
+            </ul>
+        </div>
+        -->
+        <div class="row justify-content-center" style="width: 100%; height: 100%;">
+            <div class="card mt-4">
+                <div class="card-body">
+                    <div class="form-group justify-content-start" ng-if="permisos.agregar_wf == 1">
+                        <button class="btn btn-secondary" style="background-color: #6B9CBB" type="button" id="btnAgregarWorkFlow"
+                        ng-click="agregarWorkFlow()">
+                            <i class="fas fa-plus" style="font-family: Arial, 'PT Sans', Verdana, Sans-serif; font-size: 21pt; font-weight: normal;"></i> Add a WorkFlow
+                        </button>
+                    </div>
+                    <div class="row mt-4 justify-content-center">
+                        <h3 style="font-family: Arial; color: #585E63; font-weight: bold">WorkFlows</h3>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="table-responsive">
+                            <!-- -->
+                            <table class="table table-striped table-bordered table-hover">
+                            <thead style="font-family: Arial, 'PT Sans', Verdana, Sans-serif; font-size: 12pt; color: #585E63; font-weight: normal;">
+                                <tr>
+                                    <th ng-if="permisos.cargar_primavera == 1">&nbsp</th>
+                                    <th>Name</th>
+                                    <th>Date Created</th>
+                                    <th>P6 Project</th>
+                                    <th>Smartsheet Sheet</th>
+                                    <th>Duration Factor</th>
+                                    <th>Last Run Date</th>
+                                    <th ng-if="permisos.cargar_smartsheet == 1">&nbsp</th>
+                                    <th ng-if="permisos.editar_wf == 1">&nbsp</th>
+                                    <th ng-if="permisos.eliminar_wf == 1">&nbsp</th>
+                                </tr>
+                            </thead>
+                            <tbody style="font-family: Arial, 'PT Sans', Verdana, Sans-serif; font-size: 12pt; color: #585E63; font-weight: normal;">
+                                <tr ng-repeat="wf in WorkFlows">
+                                    <td ng-if="permisos.cargar_primavera == 1">
+                                        <button class="btn btn-secondary btn-sm" type="button" data-toggle="confirmation" id="btnCargarPrimavera"
+                                        wf_id="{{wf.WF_ID}}" ng-click="cargarPrimavera(wf)">
+                                            <i class="fas fa-reply-all"></i>
+                                        </button>
+                                    </td>
+                                    <td>{{wf.NOMBRE_WF}}</td>
+                                    <td>{{wf.FECHA_CREACION}}</td>
+                                    <td>{{wf.NOMBRE_PROYECTO_PRIMAVERA}}</td>
+                                    <td>{{wf.SS_SHEET}}</td>
+                                    <td>{{wf.DURATION_FACTOR}}</td>
+                                    <td>{{wf.DATE_LAST_RUN}}</td>
+                                    <td ng-if="permisos.cargar_smartsheet == 1">
+                                        <button class="btn btn-secondary btn-sm" type="button" data-toggle="confirmation" id="btnEjecutarWF"
+                                        wf_id="{{wf.WF_ID}}" ng-click="ejecutarWF(wf)">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    <td ng-if="permisos.editar_wf == 1">
+                                        <button class="btn btn-secondary btn-sm" type="button" id="btnEditarWF"
+                                        wf_id="{{wf.WF_ID}}" ng-click="editarWF(wf)">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+                                    </td>
+                                    <td ng-if="permisos.eliminar_wf == 1">    
+                                        <button class="btn btn-secondary btn-sm" type="button" id="btnEliminarWF"
+                                        wf_id="{{wf.WF_ID}}" ng-click="eliminarWF(wf)">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Modal progreso-->
+    <div class="modal fade" id="modalProgreso" tabindex="-1" role="dialog" aria-labelledby="modalProgresoTitle" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title" id="modalProgresoTitle">Sit back, we are procesing your request!</h5>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <span>{{descripcion_progreso}}</span>
+                    </div>
+                    <div class="progress">
+                        <div id="bar" class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: 0%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">{{progreso}}%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://use.fontawesome.com/fab88ee428.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <script src="javascripts/jquery-confirm.js"></script>
+    
+    <script src="javascripts/bootstrap-confirmation.min.js"></script>
+ 
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    
+    <script src="javascripts/fileinput.min.js"></script>
+    <script src="javascripts/angular-notify.min.js"></script>
+    <script src="javascripts/socket.io.js"></script>
+    
+    <script src="javascripts/globals.js"></script>
+    <script src="javascripts/workflows.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+</body>
+</html>

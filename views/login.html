@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html ng-app="loginApp" lang="en">
+<head>
+	<title>Login Interface</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================--	
+	<link rel="icon" type="image/png" href="stylesheets/login/images/icons/favicon.ico"/>
+<!--===============================================================================================--
+	<link rel="stylesheet" type="text/css" href="stylesheets/login/vendor/bootstrap/css/bootstrap.min.css">
+<!--===============================================================================================--
+	<link rel="stylesheet" type="text/css" href="stylesheets/login/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+<!--===============================================================================================--
+	<link rel="stylesheet" type="text/css" href="stylesheets/login/fonts/iconic/css/material-design-iconic-font.min.css">
+<!--===============================================================================================--
+	<link rel="stylesheet" type="text/css" href="stylesheets/login/vendor/animate/animate.css">
+<!--===============================================================================================--	
+	<link rel="stylesheet" type="text/css" href="stylesheets/login/vendor/css-hamburgers/hamburgers.min.css">
+<!--===============================================================================================--
+	<link rel="stylesheet" type="text/css" href="stylesheets/login/vendor/animsition/css/animsition.min.css">
+<!--===============================================================================================--
+	<link rel="stylesheet" type="text/css" href="stylesheets/login/vendor/select2/select2.min.css">
+<!--===============================================================================================--
+	<link rel="stylesheet" type="text/css" href="stylesheets/login/vendor/daterangepicker/daterangepicker.css">
+<!--===============================================================================================--
+	<link rel="stylesheet" type="text/css" href="stylesheets/login/css/util.css">
+	<link rel="stylesheet" type="text/css" href="stylesheets/login/css/main.css">
+<!--===============================================================================================-->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="stylesheets/angular-notify.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="stylesheets/style.css">
+  <link rel="stylesheet" href="stylesheets/fileinput.min.css">
+  <link rel="stylesheet" href="stylesheets/datepicker.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.0/jquery-confirm.min.css">
+</head>
+<body ng-controller="login">
+	<div class="container" id="container">
+        <div class="row justify-content-center">
+            <div class="card mt-4" style="background-color: #43617E; width: 80%; height: 100%;">
+				<div class="row justify-content-around mt-4">
+					<img class="medium" src="images/smartsheetlogo.png" style="width: 15%; height: 15%;">
+					<img class="medium" src="images/systeclogo.png" style="width: 15%; height: 15%; ">
+				</div>				
+				<div class="row justify-content-center">					
+					<div class="card mt-4 mb-4" style="width: 80%; height: 100%; border-radius: 12px;">
+						<div class="row justify-content-center mt-4">
+							<p style="font-family: Arial, 'PT Sans', Verdana, Sans-serif; text-align: center; font-size: 2vw; font-weight: bold;">
+								Smartsheet - Primavera P6 Interface
+							</p>
+						</div>
+						<div class="row justify-content-center">
+							<div class="form-group col-6">
+								<label for="username">Username</label>
+								<input class="form-control" id="username" ng-model="username" type="text" name="username" placeholder="Type your username or e-mail">
+							</div>
+						</div>
+						<div class="row justify-content-center">
+							<div class="form-group col-6">
+								<label for="password">Password</label>
+								<input class="form-control" ng-model="pwd" id="password" type="password" name="pass" placeholder="Type your password">
+							</div>
+						</div>
+						<div class="row justify-content-center">
+							<div class="form-group col-6">
+								<button type="button" class="btn btn-primary btn-lg btn-block" 
+								style="background-color: #50ABCD; border-radius: 20px; font-size: 1em" ng-click="login()">
+									Login
+								</button>
+							</div>
+						</div>	
+						<div class="row justify-content-center mb-4">
+							<span class="text-danger" ng-if="mostrar_mensaje_login">{{resultado_login}}</span>
+						</div>						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+    <script src="https://use.fontawesome.com/fab88ee428.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <script src="javascripts/fileinput.min.js"></script>
+    <script src="javascripts/angular-notify.min.js"></script>
+	<script src="/javascripts/login.js"></script>
+	<script src="javascripts/globals.js"></script>
+
+</body>
+</html>

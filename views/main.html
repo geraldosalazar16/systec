@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html ng-app="MyApp" lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <!-- Meta, title, CSS, favicons, etc. -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Bootstrap core CSS -->
+  <!--<link rel="stylesheet" href="stylesheets/select2.min.css">-->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="stylesheets/angular-notify.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="stylesheets/style.css">
+  <link rel="stylesheet" href="stylesheets/fileinput.min.css">
+  <link rel="stylesheet" href="stylesheets/datepicker.min.css">
+  <link rel="stylesheet" href="stylesheets/jquery-confirm.min.css">
+ 
+  <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+</head>
+<body ng-controller="principal" style="background: #43617E">
+    <!-- Este era el loader viejo
+        <div id="loader"></div>-->
+    <nav class = "nav-bar navbar-nav" style="background-color: #50ABCD; float:none;margin:0 auto;display: block;text-align: center;">
+        <img class="small" src="images/smartsheetlogo.png" style="float: left; margin-left: 10px; width: 10%; height: 5%; ">
+        <a href="/workflows" class="navbar-brand ml-4" style="color: white">  Interface Primavera P6 Smartsheet  </a>
+                
+        <img class="small" src="images/systeclogo.png" style="float: right; margin-right: 10px; width: 10%; height: 5%; ">
+        <li class="nav-item dropdown float-right mr-5">
+            <a class="nav-link dropdown-toggle" style="color: white" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Hello, {{nombre_usuario}}
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="./users" ng-if="permisos.administrar_usuarios == 1">Manage users</a>
+                <a class="dropdown-item" href="./workflows" >Project workflows</a>
+                <a class="dropdown-item" href="./workflowsP" >Portafolio workflows</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="./login">Log out</a>
+            </div>
+        </li>
+    </nav>
+
+    <div class="container" id="container">
+        <div class="col-md-12 text-center">
+            <div class="card mt-4">
+                <!-- One "tab" for each step in the form: -->
+                <div class="tab col-md-12">
+                    <h3 class="mt-5" style="color: #585E63" ng-if="accion == 'insertar'">Choose a Smartsheet and a Primavera Project to connect...</h3>
+                    <div class="row mt-5">
+                        <div class="col-md-4 text-right">
+                            <label class="control-label">Workflow Name</label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" ng-model="workflowName">
+                        </div>                        
+                    </div>  
+                    <div class="row mt-4">
+                        <div class="col-md-4 text-right">
+                            <label class="control-label">Comments</label>
+                        </div>
+                        <div class="col-md-6">
+                            <textarea rows="3" cols="50" name="descripcion" id="descripcion" 
+                                class="form-control" ng-model="comentariosWorkflow" >
+                            </textarea>
+                        </div>
+                    </div>                  
+                    
+
+                    <div class="row mt-4">
+                        <div class="col-md-4 text-right">
+                            <label class="control-label">Select Primavera Project</label>
+                        </div>
+                        <div class="col-md-6">
+                            <select ng-model="cmbProyectos" ng-disabled="bloquear_proyectos" ng-options="proyecto.Name for proyecto in Proyectos track by proyecto.ObjectId" 
+                            class="select2_single form-control" id="cmbProyectos" ng-change='cambioProyecto()'> 
+                            </select>
+                        </div> 
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-4 text-right">
+                            <label class="control-label">Select a Smartsheet</label>
+                        </div>
+                        <div class="col-md-6">
+                            <select ng-options="hoja.nombre for hoja in Hojas track by hoja.id" ng-disabled="bloquear_hojas" ng-model="cmbHojas"
+                            class="select2_single form-control" id="cmbHojas" ng-change='cambioHojas()'> 
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="tab col-md-12">
+                    <h3 class="mt-5" style="color: #585E63">For each Primavera column, select a corresponding Smartsheet column
+                    </h3>
+                    <div class='row mt-4 ml-4'>    
+                        <button class="btn btn-outline-primary btn-sm" type="button" id="btnAgregarEnlace"
+                        ng-click="insertarEnlace()">
+                            <i class="fas fa-plus"></i> Add a new bind
+                        </button>
+                    </div>
+                        <div class="row mt-4">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead style="font-family: Arial, 'PT Sans', Verdana, Sans-serif; font-size: 12pt; color: #585E63; font-weight: normal;">
+                                        <tr>
+                                            <th>Column From Primavera</th>
+                                            <th>Column from Smartsheet</th>
+                                            <th>Filter</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="font-family: Arial, 'PT Sans', Verdana, Sans-serif; font-size: 12pt; color: #585E63; font-weight: normal;">
+                                        <tr ng-repeat="enlace in Enlaces">
+                                            <td>{{enlace.NOMBRE_P6}}</td>
+                                            <td>{{enlace.NOMBRE_SS}}</td>
+                                            <td>
+                                                {{enlace.descripcion}}
+                                            </td>
+                                            <td>
+                                                    <button class="btn btn-secondary btn-sm" type="button" id="btnEditarEnlace"
+                                                    ng-click="editarEnlace(enlace.id)">
+                                                        <i class="fas fa-pencil-alt"></i>
+                                                    </button>
+                                                    <button class="btn btn-secondary btn-sm" type="button" id="btnEliminarEnlace"
+                                                    ng-click="eliminarEnlace(enlace.id)">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                </div>
+
+                <!-- Circles which indicates the steps of the form: -->
+                <div style="text-align:center;margin-top:40px;">
+                    <span class="step"></span>
+                    <span class="step"></span>
+                </div>
+
+                <div class= "row justify-content-end">
+                    <button type="button" style="margin-bottom: 5%; margin-right: 1rem" id="prevBtn" class="btn btn-secondary" ng-click="nextPrev(-1)">Previous</button>
+                    <button type="button" style="margin-right: 5%; margin-bottom: 5%" id="nextBtn" class="btn btn-secondary" ng-click="nextPrev(1)">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal insertar/actualizar-->
+    <div class="modal fade" id="modalInsertarActualizar" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" 
+    data-backdrop="static" data-keyboard="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modalTitulo">Insert new bind</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body"> 
+                    <!--
+                        <form name="exampleForm">                                
+                        <div class="form-group">
+                            <label for="columnaP6">Select Primavera Column</label>
+                            <select ng-model="formData.columnaP6" ng-disabled="bloquear_columna_p6" 
+                            ng-options="columna.NOMBRE for columna in columnasP6 track by columna.ID"
+                            ng-change='cambioColumnaP6()'
+                            class="select2_single form-control" id="columnaP6" name="columnaP6" required
+                            ng-class="{ error: exampleForm.columnaP6.$error.required && !exampleForm.$pristine}">
+                        </div>
+                        <div class="form-group">
+                            <label for="columnaSS">Select Smartsheet Column</label>
+                            <select ng-model="formData.columnaSS" ng-disabled="bloquear_columna_ss"
+                            ng-options="columna.title for columna in columnasSS track by columna.id"
+                            class="select2_single form-control" id="columnaSS" name="columnaSS" required
+                            ng-class="{ error: exampleForm.columnaSS.$error.required && !exampleForm.$pristine}">
+                        </div>
+                        <div class="form-group">
+                            <label ng-show='mostrarFiltroStatus||mostrarSelectFechas||mostrarFiltroActityCode' >Filter rows by value</label>
+                            <select ng-model="formData.status" id="status" name="status"
+                            ng-change='cambioStatus()'  ng-show='mostrarFiltroStatus' required
+                            ng-class="{ error: exampleForm.status.$error.required && !exampleForm.$pristine}">
+                                <option value="All" >All</option>
+                                <option value="Not Started" >Not Started</option>
+                                <option value="In Progress" >In Progress</option>
+                                <option value="Completed" >Completed</option>
+                            </select>
+                            <select ng-model="formData.fecha" id="fecha" name="fecha"
+                            ng-change='cambioSelectFechas()'  ng-show='mostrarSelectFechas' required
+                            ng-class="{ error: exampleForm.fecha.$error.required && !exampleForm.$pristine}">
+                                <option value="Any">Any</option>
+                                <option value="Before">Before</option>
+                                <option value="After">After</option>
+                                <option value="Equal">Equal</option>
+                                <option value="Range">Range</option>
+                            </select>
+                            <select ng-model="formData.activity_codes" id="activity_codes" name="activity_codes"
+                            ng-change='cambioActivityCode()'  ng-show='mostrarFiltroActityCode' required
+                            ng-class="{ error: exampleForm.status.$error.required && !exampleForm.$pristine}"
+                            ng-options= 'ac as ac.CodeValue for ac in ActivityCodesFiltrados '> 
+                            </select>
+                            <input type='text' ng-model="formData.inputDatePicker" id='inputDatePicker' class='datepicker-here form-control'
+                                data-range='false' data-language='en' ng-show='mostrarInputFechas'/>
+                        </div>
+                        <input type="submit" class="btn btn-success pull-right mt-2" ng-click="submitForm(formData)" ng-disabled="!exampleForm.$valid" value="Save"/>
+                    </form>
+                    -->
+                    <form name="exampleForm"> 
+                    <div class='row'>
+                        <div class='col-md-6'>
+                            <select ng-model="cmbLogica" class="form-control" ng-show='mostrarLogica'> 
+                                <option value="Inclusive" >AND</option>
+                                <option value="Exclusive" >OR</option> 
+                            </select>
+                        </div>
+                    </div>                   
+                    <div class='row' style='margin-top: 15px;'>
+                        <div class='col-md-6'>
+                            <label class="control-label">Select Primavera Column<span class="required">*</span></label>
+                            
+                            <select ng-model="cmbColumnasP6" ng-disabled="bloquear_columna_p6" required="required" id="cmbColumnasP6" ng-change='cambioColumnaP6()'
+                            class="form-control" data-parsley-id="2324" ng-options="columna.NOMBRE for columna in columnasP6 track by columna.ID_INTERFACE"
+                            ng-class="{ error: cmbColumnasP6.$error.required && !exampleForm.$pristine}"></select>
+                                    <!--<option value="">Select a column</option>-->
+                            </select>
+                        </div>
+                            <div class='col-md-6'>
+                                    <label class="control-label">Select Smartsheet Column<span class="required">*</span></label>
+                                    <select ng-model="cmbColumnasSS" ng-disabled="bloquear_columna_ss" required="required" id="cmbColumnasSS"
+                                    class="form-control" data-parsley-id="2324" ng-options="columna.title for columna in columnasSS track by columna.id">
+                                        <!--<option value="">Select a column</option>-->
+                                    </select>
+                                </div>
+                    </div>
+                    <div class = 'row col-md-12' style='margin-top: 15px;'>
+                                <!--
+                                Incluyo todos los posibles filtros y los controlo con ng-show
+                                -->
+                                <label class="control-label col-md-12" ng-show='mostrarFiltroStatus||mostrarSelectFechas||mostrarFiltroActityCode'>Filter rows by value</label>
+                                <!--Filtro para el status tres valores -->
+                                <select ng-model="cmbStatus" class="form-control" ng-change='cambioStatus()' ng-show='mostrarFiltroStatus'> 
+                                    <option value="All" >All</option>
+                                    <option value="Not Started" >Not Started</option>
+                                    <option value="In Progress" >In Progress</option>
+                                    <option value="Completed" >Completed</option>
+                                </select>
+                                <!--Filtro para fechas -->
+                                <div class='col-md-4'>
+                                    <select ng-model="cmbSelectFechas" class="form-control" ng-change='cambioSelectFechas()' 
+                                    ng-show='mostrarSelectFechas' id='cmbSelectFechas'> 
+                                        <option value="Any">Any</option>
+                                        <option value="Before">Before</option>
+                                        <option value="After">After</option>
+                                        <option value="Equal">Equal</option>
+                                        <option value="Range">Range</option>
+                                    </select>
+                                </div>
+                                <div class='col-md-8'>
+                                    <input type='text' ng-model="inputDatePicker" id='inputDatePicker' class='datepicker-here form-control'
+                                    data-range='false' data-language='en' ng-show='mostrarInputFechas' />
+                                </div>
+                                <!--Filtro para activity codes -->
+                                <select ng-model="cmbActivityCode" class="form-control" ng-change='cambioActivityCode()' 
+                                ng-show='mostrarFiltroActityCode'
+                                ng-options= 'ac as ac.CodeValue for ac in ActivityCodesFiltrados '> 
+                                </select>
+                    </div> 
+                    </form>               
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" ng-click="guardarEnlace()" id="btnGuardarEnlace" 
+                ng-disabled="!exampleForm.$valid">{{accion_enlace}} </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://use.fontawesome.com/fab88ee428.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <script src="javascripts/fileinput.min.js"></script>
+    <script src="javascripts/angular-notify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <script src="javascripts/datepicker.min.js"></script>
+    <script src="javascripts/datepicker.en.js"></script>
+    <script src="javascripts/blockUI.js"></script>
+    <script src="javascripts/jquery-confirm.js"></script>
+    <!--<script src="javascripts/daterangepicker.js"></script>
+
+        
+
+    <script src="../node_modules/@cgross/angular-notify/dist/angular-notify.js"></script>
+    <!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.0.0/pnotify.min.js"></script>
+    <script src="javascripts/notify.js"></script>
+    <script src="javascripts/pnotify.custom.min.js"></script>
+    -->
+    <script src="javascripts/globals.js"></script>
+    <script src="javascripts/principal.js"></script>
+    <!--
+    <script src="javascripts/select2.full.js"></script>
+    <script src="javascripts/select2/i18n/es.js"></script>
+    -->
+</body>
+</html>
