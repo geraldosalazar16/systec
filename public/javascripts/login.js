@@ -62,8 +62,10 @@ app.controller('login', ['$scope', '$http','$window','notify', function($scope, 
                     sessionStorage.editar_wfP = editar_wfP['VALOR'];
                     sessionStorage.eliminar_wfP = eliminar_wfP['VALOR'];
 
+                    //Redireccionar a la carga de credenciales de primavera
+                    $window.location.href = 'credPrimavera';
 
-                    $window.location.href = 'workflows';
+                    //$window.location.href = 'workflows';
                 }
                 else{
                     $scope.mostrar_mensaje_login = true;

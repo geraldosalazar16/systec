@@ -62,6 +62,9 @@ var getPortafolio = require('./routes/getPortafolio');
 var getListaPosiblesValoresProjectCodes = require('./routes/getListaPosiblesValoresProjectCodes');
 var getRelacionProyectosCodigos = require('./routes/getRelacionProyectosCodigos');
 
+var credPrimavera = require('./routes/credPrimavera');
+var setP6 = require('./routes/setP6');
+
 var app = express();
 
 app.engine('html', require('ejs').renderFile);
@@ -139,6 +142,9 @@ app.use('/getProyectoById',getProyectoById);
 app.use('/getPortafolio',getPortafolio);
 app.use('/getListaPosiblesValoresProjectCodes',getListaPosiblesValoresProjectCodes);
 app.use('/getRelacionProyectosCodigos',getRelacionProyectosCodigos);
+
+app.use('/credPrimavera',credPrimavera);
+app.use('/setP6',setP6);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
