@@ -62,8 +62,10 @@ app.controller('login', ['$scope', '$http','$window','notify', function($scope, 
                     sessionStorage.editar_wfP = editar_wfP['VALOR'];
                     sessionStorage.eliminar_wfP = eliminar_wfP['VALOR'];
 
+                    //Redireccionar a la carga de credenciales de primavera
+                    $window.location.href = 'credPrimavera';
 
-                    $window.location.href = 'workflows';
+                    //$window.location.href = 'workflows';
                 }
                 else{
                     $scope.mostrar_mensaje_login = true;
@@ -74,6 +76,19 @@ app.controller('login', ['$scope', '$http','$window','notify', function($scope, 
             else{
                 $scope.mostrar_mensaje_login = true;
                 $scope.resultado_login = 'Conection error, no database service detected';
+                //$window.location.href = 'login';
+            }
+        });
+    }
+    $scope.loginSmartsheet = function(){
+        $http.post('/loginSmartsheet').
+        then(function(response) {
+            if(response.data != 'error'){
+                $window.location.href = response.data;
+            }
+            else{
+                $scope.mostrar_mensaje_login = true;
+                $scope.resultado_login = 'Something bad happened';
                 //$window.location.href = 'login';
             }
         });
