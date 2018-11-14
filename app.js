@@ -6,12 +6,14 @@ var cookieParser = require('cookie-parser');
 //var cookieParser = require('cookies');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var cors = require('cors');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 var leer_hoja = require('./routes/leer_hoja');
 var cargar_hoja = require('./routes/cargar_hoja');
 var login = require('./routes/login');
+var loginSmartsheet = require('./routes/loginSmartsheet');
 var main = require('./routes/main');
 var mainP = require('./routes/mainP');
 var workflows = require('./routes/workflows');
@@ -67,6 +69,7 @@ var setP6 = require('./routes/setP6');
 
 var app = express();
 
+
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 // view engine setup
@@ -88,11 +91,28 @@ app.use(session({
   saveUninitialized: true
 }));
 
+//CORS
+/*
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+app.all('*', function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+*/
+app.use(cors());
+
 app.use('/', index);
 app.use('/users', users);
 app.use('/leer', leer_hoja);
 app.use('/cargar', cargar_hoja);
 app.use('/login', login);
+app.use('/loginSmartsheet', loginSmartsheet);
 app.use('/main', main);
 app.use('/mainP', mainP);
 app.use('/workflows', workflows);
@@ -146,6 +166,7 @@ app.use('/getRelacionProyectosCodigos',getRelacionProyectosCodigos);
 app.use('/credPrimavera',credPrimavera);
 app.use('/setP6',setP6);
 
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
@@ -163,5 +184,7 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   //res.render('error');
 });
+
+
 
 module.exports = app;

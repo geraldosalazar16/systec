@@ -80,4 +80,17 @@ app.controller('login', ['$scope', '$http','$window','notify', function($scope, 
             }
         });
     }
+    $scope.loginSmartsheet = function(){
+        $http.post('/loginSmartsheet').
+        then(function(response) {
+            if(response.data != 'error'){
+                $window.location.href = response.data;
+            }
+            else{
+                $scope.mostrar_mensaje_login = true;
+                $scope.resultado_login = 'Something bad happened';
+                //$window.location.href = 'login';
+            }
+        });
+    }
 }]);
