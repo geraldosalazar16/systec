@@ -93,4 +93,31 @@ app.controller('login', ['$scope', '$http','$window','notify', function($scope, 
             }
         });
     }
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+          var pair = vars[i].split("=");
+          if (pair[0] == variable) {
+            return pair[1];
+          }
+        } 
+        console.log('Query Variable ' + variable + ' not found');
+        return null;
+    }
+    function entryPoint(){
+        var msg = getQueryVariable('msg');
+        if(msg){
+            $scope.mostrar_mensaje_login = true;
+            if(msg == 'user_not_found'){
+                $scope.resultado_login = 'User not found. Contact your administrator to get credentials.';
+                $.alert({
+                    title: 'Error!',
+                    content: 'User not found. Contact your administrator to get credentials!',
+                });
+            }
+        }
+    }
+    entryPoint();
 }]);
+

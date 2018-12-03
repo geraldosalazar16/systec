@@ -81,6 +81,99 @@ userModel.validarUsuario = function(username,pwd,callback){
         });
     }
 }
+userModel.validarUsuarioOAuth = function(userProfile,callback){
+    if(con){
+        //Primero busco al usuario por el id de smartsheet, para saber si ya ha entrado con el OAuth
+        var sql = "SELECT * FROM usuarios WHERE ID_SMARTSHEET = "+con.escape(userProfile.id);
+        con.query(sql, function (err, result) {
+            if (err) 
+                callback(err,null); 
+            else{
+                //Verificar que haya encontrado algo
+                var usuario;
+                if(result[0]){
+                    //Si el usuario existe devuelvo su información
+                    var res = result[0];
+                     //Informacion de permisos
+                    var sql = "SELECT p.NOMBRE,pp.ID_PERFIL,pp.ID_PERMISO,pp.VALOR "+
+                    "FROM perfil_permisos pp INNER JOIN perfiles p ON pp.ID_PERFIl = p.ID "+
+                     "WHERE pp.ID_PERFIL = "+result[0]['ID_PERFIL'];
+                    con.query(sql, function (err, result) {
+                        if (err) 
+                            callback(err,null);
+                        else{
+                            usuario = {
+                                id: res['ID'],
+                                username: res['NOMBRE'],
+                                token: res['TOKEN'],
+                                usuario_primavera: res['USUARIO_PRIMAVERA'],
+                                pwd_primavera: res['PWD_PRIMAVERA'],
+                                url_primavera: res['URL_PRIMAVERA'],
+                                perfil: result[0]['NOMBRE'],
+                                autenticado: true,
+                                password: res['CONTRASENA'],
+                                permisos: result
+                            };
+                            callback(null,usuario);
+                        }
+                    });
+                } else { //No se encuentra el usuario pro el id de smartsheet
+                    //Es posible que el usuario esté ya creado solo que nunca ha usado OAuth
+                    var sql = "SELECT * FROM usuarios WHERE NOMBRE LIKE "+con.escape(userProfile.firstName)+" AND CORREO = "+con.escape(userProfile.email);
+                    con.query(sql, function (err, result) {
+                        if (err) 
+                            callback(err,null); 
+                        else{
+                            var usuario;
+                            if(result[0]){                                
+                                var res = result[0];
+                                //Debo insertar el id de smartsheet
+                                var sql = "UPDATE usuarios SET ID_SMARTSHEET = "+userProfile.id+"  WHERE ID = "+result[0]["ID"];
+                                con.query(sql, function (err, result) {
+                                    if (err) 
+                                        callback(err,null);
+                                    else{
+                                        //Informacion de permisos
+                                        sql = "SELECT p.NOMBRE,pp.ID_PERFIL,pp.ID_PERMISO,pp.VALOR "+
+                                        "FROM perfil_permisos pp INNER JOIN perfiles p ON pp.ID_PERFIl = p.ID "+
+                                        "WHERE pp.ID_PERFIL = "+res['ID_PERFIL'];
+                                        con.query(sql, function (err, result) {
+                                            if (err) 
+                                                callback(err,null);
+                                            else{
+                                                usuario = {
+                                                    id: res['ID'],
+                                                    username: res['NOMBRE'],
+                                                    token: res['TOKEN'],
+                                                    usuario_primavera: res['USUARIO_PRIMAVERA'],
+                                                    pwd_primavera: res['PWD_PRIMAVERA'],
+                                                    url_primavera: res['URL_PRIMAVERA'],
+                                                    perfil: result[0]['NOMBRE'],
+                                                    autenticado: true,
+                                                    password: res['CONTRASENA'],
+                                                    permisos: result
+                                                };
+                                                callback(null,usuario);
+                                            }
+                                        });
+                                    }
+                                });                                
+                            } else {
+                                usuario = {
+                                    id: 0,
+                                    username: '',
+                                    token: '',
+                                    autenticado: false
+                                };
+                                callback(null,usuario);
+                            }
+                        }   
+                    });
+                }
+            }   
+        });
+    }
+}
 userModel.getColumnasP6 = function(callback){
     if(con){
         var sql = "SELECT * FROM columnas_P6 where TIPO_WORKFLOW = 'PROYECTO'";

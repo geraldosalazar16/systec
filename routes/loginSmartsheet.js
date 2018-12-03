@@ -8,7 +8,7 @@ const qs = require('querystring');
 const authorizationUri = authorizeURL({
     response_type: 'code',
     client_id: '14g7rriwn93nerf1kud',
-    redirect_uri: 'http://35.196.125.195:3000/loginSmartsheet',
+    redirect_uri: 'http://localhost:3000/loginSmartsheet',
     scope: 'CREATE_SHEETS WRITE_SHEETS',
 });
 
@@ -71,6 +71,7 @@ router.get('/',function(req, res, next) {
     smartsheet.tokens.getAccessToken(options)
     .then(function(token) {
         console.log(token);
+
         
         var ss = ssclient.createClient({
             accessToken: token.access_token,
@@ -79,13 +80,29 @@ router.get('/',function(req, res, next) {
         ss.users.getCurrentUser()
         .then(function(userProfile) {
             console.log(userProfile);
-          })
-          .catch(function(error) {
-              console.log(error);
+            //Con los datos del usuario debo identificar si ya existe
+            userModel.validarUsuarioOAuth(userProfile,function(error,data){
+                if(error){
+                    res.send('error');
+                }
+                else{
+                    req.session.usuario = data;
+                    req.session.autenticado = data.autenticado;
+                    //Si el usuario no está autenticado es porque no tiene cuenta en SSP6
+                    if(!data.autenticado){
+                        res.redirect('/login?msg=user_not_found');
+                    } else {
+                        req.session.usuario = data;
+                        req.session.autenticado = data.autenticado;
+                        res.redirect('/credPrimavera?validar=true');
+                    }
+                }
             });
-            
-           
-        res.redirect('/workflows');
+        })
+        .catch(function(error) {
+            console.log(error);
+        });
+        
     })
     .catch(function(error) {
     console.log(error);

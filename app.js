@@ -65,6 +65,7 @@ var getListaPosiblesValoresProjectCodes = require('./routes/getListaPosiblesValo
 var getRelacionProyectosCodigos = require('./routes/getRelacionProyectosCodigos');
 
 var credPrimavera = require('./routes/credPrimavera');
+var validarCredenciales = require('./routes/validarCredenciales');
 var setP6 = require('./routes/setP6');
 
 var app = express();
@@ -164,6 +165,7 @@ app.use('/getListaPosiblesValoresProjectCodes',getListaPosiblesValoresProjectCod
 app.use('/getRelacionProyectosCodigos',getRelacionProyectosCodigos);
 
 app.use('/credPrimavera',credPrimavera);
+app.use('/validarCredenciales',validarCredenciales);
 app.use('/setP6',setP6);
 
 
