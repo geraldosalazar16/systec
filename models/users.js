@@ -7,6 +7,9 @@ var con = mysql.createConnection({
     password: "",
     database: "systec"
 });
+
+var crypto = require('crypto');
+
 function obtener_fecha_actual (){
     //Obtener la fecha de guardado
     var today = new Date();
@@ -26,7 +29,13 @@ var userModel = {};
 
 userModel.validarUsuario = function(username,pwd,callback){
     if(con){
-        var sql = "SELECT * FROM usuarios WHERE CONTRASENA = "+con.escape(pwd)+ " AND NOMBRE = " + con.escape(username);
+        // Create hash
+        var hash =
+        crypto.createHash('sha256')
+        .update(pwd)
+        .digest('hex');
+
+        var sql = "SELECT * FROM usuarios WHERE CONTRASENA = "+con.escape(hash)+ " AND NOMBRE = " + con.escape(username);
         con.query(sql, function (err, result) {
             if (err) 
                 callback(err,null); 
@@ -837,8 +846,15 @@ userModel.getUsuarios = function(callback){
 }
 userModel.guardarUsuario = function(info,callback){
     if(con){
+        
+        // Create hash
+        var hash =
+        crypto.createHash('sha256')
+        .update(info.pwd)
+        .digest('hex');
+
         var sql = "INSERT INTO usuarios (NOMBRE,CORREO,CONTRASENA,TOKEN,USUARIO_PRIMAVERA,PWD_PRIMAVERA,URL_PRIMAVERA, ID_PERFIL) VALUES ("+
-        con.escape(info.nombre_usuario)+","+con.escape(info.correo)+","+con.escape(info.pwd)+","+con.escape(info.token_ss)+","+
+        con.escape(info.nombre_usuario)+","+con.escape(info.correo)+","+con.escape(hash)+","+con.escape(info.token_ss)+","+
         con.escape(info.usuario_primavera)+","+con.escape(info.pwd_primavera)+","+con.escape(info.url_primavera)+","+con.escape(info.id_perfil)+");";
         con.query(sql, function (err, result) {
             if (err) {
@@ -853,9 +869,15 @@ userModel.guardarUsuario = function(info,callback){
 }
 userModel.editarUsuario = function(info,callback){
     if(con){
+        // Create hash
+        var hash =
+        crypto.createHash('sha256')
+        .update(info.pwd)
+        .digest('hex');
+
         var sql = "UPDATE usuarios SET NOMBRE="+con.escape(info.nombre_usuario)+
         ",CORREO="+con.escape(info.correo)+
-        ",CONTRASENA="+con.escape(info.pwd)+
+        ",CONTRASENA="+con.escape(hash)+
         ",TOKEN="+con.escape(info.token_ss)+
         ",USUARIO_PRIMAVERA="+con.escape(info.usuario_primavera)+
         ",PWD_PRIMAVERA="+con.escape(info.pwd_primavera)+

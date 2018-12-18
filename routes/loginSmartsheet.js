@@ -33,80 +33,86 @@ router.post('/',function(req, res, next) {
 
 router.get('/',function(req, res, next) {
     var code = req.query.code;
+    //Cuando el usuario selecciona allow env´´ia el código
+    if(code){
+        var crypto = require('crypto');
+        // Create hash
+        var hash =
+        crypto.createHash('sha256')
+        .update('w7ay0sl6tj9ksfxvwcy' + '|' + code)
+            // ('Your App Secret' + '|' + 'Received Authorization Code')
+        .digest('hex');
 
-    var crypto = require('crypto');
-    // Create hash
-    var hash =
-    crypto.createHash('sha256')
-    .update('w7ay0sl6tj9ksfxvwcy' + '|' + code)
-        // ('Your App Secret' + '|' + 'Received Authorization Code')
-    .digest('hex');
-
-    // Set options
-    var options = {
-        queryParameters: {
-            client_id: '14g7rriwn93nerf1kud',   // Your App Client ID
-            code: code,            // Received Authorization Code
-            hash: hash
-        },
-        contentType: 'application/x-www-form-urlencoded'
-    };
-    /*
-    var req = http.request(optionsRequest, callback);
-    //This is the data we are posting, it needs to be a string or a buffer
-    var data = 'grant_type=authorization_code&code='+code+'&client_id=1samp48lel5for68you&hash='+hash;
-    req.write(data);
-    req.end();
-    */
-    // Get access token
-    
-    ssclient = require('smartsheet');
-    // instantiating the Smartsheet client
-    const smartsheet = ssclient.createClient({
-        // a blank token provides access to Smartsheet token endpoints
-        accessToken: ''
-    });
-
-    // Get access token
-    smartsheet.tokens.getAccessToken(options)
-    .then(function(token) {
-        console.log(token);
-
+        // Set options
+        var options = {
+            queryParameters: {
+                client_id: '14g7rriwn93nerf1kud',   // Your App Client ID
+                code: code,            // Received Authorization Code
+                hash: hash
+            },
+            contentType: 'application/x-www-form-urlencoded'
+        };
+        /*
+        var req = http.request(optionsRequest, callback);
+        //This is the data we are posting, it needs to be a string or a buffer
+        var data = 'grant_type=authorization_code&code='+code+'&client_id=1samp48lel5for68you&hash='+hash;
+        req.write(data);
+        req.end();
+        */
+        // Get access token
         
-        var ss = ssclient.createClient({
-            accessToken: token.access_token,
-            logLevel: 'info'
+        ssclient = require('smartsheet');
+        // instantiating the Smartsheet client
+        const smartsheet = ssclient.createClient({
+            // a blank token provides access to Smartsheet token endpoints
+            accessToken: ''
         });
-        ss.users.getCurrentUser()
-        .then(function(userProfile) {
-            console.log(userProfile);
-            //Con los datos del usuario debo identificar si ya existe
-            userModel.validarUsuarioOAuth(userProfile,function(error,data){
-                if(error){
-                    res.send('error');
-                }
-                else{
-                    req.session.usuario = data;
-                    req.session.autenticado = data.autenticado;
-                    //Si el usuario no está autenticado es porque no tiene cuenta en SSP6
-                    if(!data.autenticado){
-                        res.redirect('/login?msg=user_not_found');
-                    } else {
+
+        // Get access token
+        smartsheet.tokens.getAccessToken(options)
+        .then(function(token) {
+            console.log(token);
+
+            
+            var ss = ssclient.createClient({
+                accessToken: token.access_token,
+                logLevel: 'info'
+            });
+            ss.users.getCurrentUser()
+            .then(function(userProfile) {
+                console.log(userProfile);
+                //Con los datos del usuario debo identificar si ya existe
+                userModel.validarUsuarioOAuth(userProfile,function(error,data){
+                    if(error){
+                        res.send('error');
+                    }
+                    else{
                         req.session.usuario = data;
                         req.session.autenticado = data.autenticado;
-                        res.redirect('/credPrimavera?validar=true');
+                        //Si el usuario no está autenticado es porque no tiene cuenta en SSP6
+                        if(!data.autenticado){
+                            res.redirect('/login?msg=user_not_found');
+                        } else {
+                            req.session.usuario = data;
+                            req.session.autenticado = data.autenticado;
+                            res.redirect('/credPrimavera?validar=true');
+                        }
                     }
-                }
+                });
+            })
+            .catch(function(error) {
+                console.log(error);
             });
+            
         })
         .catch(function(error) {
-            console.log(error);
+        console.log(error);
         });
-        
-    })
-    .catch(function(error) {
-    console.log(error);
-    });
+    } else { //Código que se ejecuta si seleccionan Deny
+        var error = req.query.error;
+        res.redirect('/login?msg=deny');
+    }
+    
     
 });
 
