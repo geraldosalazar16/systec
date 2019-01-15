@@ -8,7 +8,7 @@ router.post('/', function(req, res, next) {
     var username = req.session.usuario.username
     var password = req.session.usuario.password;
 
-    userModel.validarUsuario(username,password,function(error,data){
+    userModel.validarUsuarioSesion(username,password,function(error,data){
         if(error){
             res.send('error');
         }

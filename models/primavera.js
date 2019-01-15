@@ -634,10 +634,12 @@ primavera.getPortafolio = function(usuario,callback){
                 'SummaryActualDuration',
                 'SummaryRemainingDuration',
                 'SummaryAtCompletionTotalCostVariance',
-                'SummaryBudgetAtCompletionByCost',
+                'SummaryRemainingTotalCost',
                 'SummaryDurationVariance',
                 'SummaryTotalCostVariance',
-                'ActivityDefaultCalendarObjectId'               
+                'ActivityDefaultCalendarObjectId',
+                'SummaryAtCompletionTotalCost',
+                              
             ]
         }; 
         client.ReadProjects(args,function(err, result,rawResponse, soapHeader, rawRequest) {
@@ -687,11 +689,13 @@ primavera.asyncgetProyectos = function(usuario,callback){
                       'SummaryActualDuration',
                       'SummaryRemainingDuration',
                       'SummaryAtCompletionTotalCostVariance',
-                      'SummaryBudgetAtCompletionByCost',
+                      'SummaryRemainingTotalCost',
                       'SummaryDurationVariance',
                       'SummaryAtCompletionTotalCost', 
                       'ActivityDefaultCalendarObjectId',
-                      'SummaryRemainingTotalCost'               
+                      'SummaryRemainingTotalCost', 
+                      'SummaryAtCompletionTotalCost',
+                      'SummaryTotalCostVariance',                
                   ]
               }; 
               client.ReadProjects(args,function(err, result,rawResponse, soapHeader, rawRequest) {

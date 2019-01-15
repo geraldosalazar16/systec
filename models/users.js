@@ -90,6 +90,65 @@ userModel.validarUsuario = function(username,pwd,callback){
         });
     }
 }
+userModel.validarUsuarioSesion = function(username,pwd,callback){
+    if(con){
+        //Se valida sin hash ya que esta recibiendo la contraseña de la sesion
+
+        var sql = "SELECT * FROM usuarios WHERE CONTRASENA = "+con.escape(pwd)+ " AND NOMBRE = " + con.escape(username);
+        con.query(sql, function (err, result) {
+            if (err) 
+                callback(err,null); 
+            else{
+                var usuario;
+                if(result[0]){
+                    if(result[0]['NOMBRE'] == username){
+                        var res = result[0];
+                        //Informacion de permisos
+                        var sql = "SELECT p.NOMBRE,pp.ID_PERFIL,pp.ID_PERMISO,pp.VALOR "+
+                        "FROM perfil_permisos pp INNER JOIN perfiles p ON pp.ID_PERFIl = p.ID "+
+                        "WHERE pp.ID_PERFIL = "+result[0]['ID_PERFIL'];
+                        con.query(sql, function (err, result) {
+                            if (err) 
+                                callback(err,null);
+                            else{
+                                usuario = {
+                                    id: res['ID'],
+                                    username: res['NOMBRE'],
+                                    token: res['TOKEN'],
+                                    usuario_primavera: res['USUARIO_PRIMAVERA'],
+                                    pwd_primavera: res['PWD_PRIMAVERA'],
+                                    url_primavera: res['URL_PRIMAVERA'],
+                                    perfil: result[0]['NOMBRE'],
+                                    autenticado: true,
+                                    permisos: result
+                                };
+                                callback(null,usuario);
+                            }
+                        });
+                    }
+                    else{
+                        usuario = {
+                            id: 0,
+                            username: '',
+                            token: '',
+                            autenticado: false
+                        };
+                        callback(null,usuario);
+                    }
+                }
+                else{
+                    usuario = {
+                        id: 0,
+                        username: '',
+                        token: '',
+                        autenticado: false
+                    };
+                    callback(null,usuario);
+                }
+            }   
+        });
+    }
+}
 userModel.validarUsuarioOAuth = function(userProfile,callback){
     if(con){
         //Primero busco al usuario por el id de smartsheet, para saber si ya ha entrado con el OAuth

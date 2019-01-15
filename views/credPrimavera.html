@@ -26,9 +26,12 @@
                 <a href="/workflows" class="navbar-brand ml-4" style="color: white">  Interface Primavera P6 Smartsheet  </a>
                 <img class="small" src="images/systeclogo.png" style="float: right; margin-right: 10px; width: 10%; height: 5%; ">
                 <li class="nav-item dropdown float-right mr-5">
-                    <a class="nav-link " style="color: white" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" style="color: white" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Hello, {{nombre_usuario}}
-                    </a>                    
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="./login">Log out</a>
+                    </div>
                 </li>
             </nav>
 
