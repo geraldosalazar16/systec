@@ -329,6 +329,26 @@ userModel.almacenarWorkFlow = function(info,callback){
         }
     }
 }
+userModel.updateWorkFlow = function(info,callback){
+    var nombre_proyecto_primavera = info['nombre_proyecto_primavera'];
+    var nombre_hoja_ss = info['nombre_hoja_ss'];
+    var id_wf = info['id_wf'];
+
+    if(con){
+            var sql = "UPDATE workflows SET NOMBRE_PROYECTO_PRIMAVERA = '"+con.escape(nombre_proyecto_primavera)+
+            "',NOMBRE_HOJA_SS = '"+con.escape(nombre_hoja_ss)+"'"+
+            " WHERE ID = "+id_wf;
+            con.query(sql, function (err, result) {
+                if (err){
+                    console.log(err);
+                    callback(err,null); 
+                }
+                else{
+                    callback(null,[{ID:id_wf}]); 
+                }
+            });        
+    }
+}
 userModel.almacenarWorkFlowP = function(info,callback){
     var id_wf = info['id_wf'];
     var id_usuario = info['id_usuario'];

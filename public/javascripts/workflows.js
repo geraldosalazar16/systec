@@ -174,6 +174,11 @@ app.controller('workflow', ['$scope', '$http','$window','notify', function($scop
         });        
     }
     $scope.editarWF = function(workflow){
+        //Actualizar nombre de primavera y de ss
+        $http.get('/updateWorkflow',{params:{id_wf:workflow.ID_WF}}).
+        then(function(response){
+            
+        });
         sessionStorage.accion = 'editar';
         sessionStorage.id_wf = workflow.ID_WF;
         $window.location.href = 'main';
