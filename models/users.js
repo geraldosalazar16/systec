@@ -330,13 +330,31 @@ userModel.almacenarWorkFlow = function(info,callback){
     }
 }
 userModel.updateWorkFlow = function(info,callback){
-    var nombre_proyecto_primavera = info['nombre_proyecto_primavera'];
-    var nombre_hoja_ss = info['nombre_hoja_ss'];
-    var id_wf = info['id_wf'];
+    var nombre_proyecto_primavera = info.project_name;
+    var nombre_hoja_ss = info.sheet_name;
+    var id_wf = info.id_wf;
 
     if(con){
-            var sql = "UPDATE workflows SET NOMBRE_PROYECTO_PRIMAVERA = '"+con.escape(nombre_proyecto_primavera)+
-            "',NOMBRE_HOJA_SS = '"+con.escape(nombre_hoja_ss)+"'"+
+            var sql = "UPDATE workflows SET NOMBRE_PROYECTO_PRIMAVERA = "+con.escape(nombre_proyecto_primavera)+
+            ",NOMBRE_HOJA_SS = "+con.escape(nombre_hoja_ss)+
+            " WHERE ID = "+id_wf;
+            con.query(sql, function (err, result) {
+                if (err){
+                    console.log(err);
+                    callback(err,null); 
+                }
+                else{
+                    callback(null,[{ID:id_wf}]); 
+                }
+            });        
+    }
+}
+userModel.updateWorkFlowP = function(info,callback){
+    var nombre_hoja_ss = info.sheet_name;
+    var id_wf = info.id_wf;
+
+    if(con){
+            var sql = "UPDATE workflowsp SET NOMBRE_HOJA_SS = "+con.escape(nombre_hoja_ss)+
             " WHERE ID = "+id_wf;
             con.query(sql, function (err, result) {
                 if (err){

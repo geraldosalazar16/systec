@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
-var primavera = require('../models/primavera.js')
+var primavera = require('../models/primavera.js');
+var userModel = require('../models/users.js');
 
 router.post('/', function(req, res, next) {
     var io = req.app.io;
@@ -17,6 +18,7 @@ router.post('/', function(req, res, next) {
     var id_hoja = req.body['id_hoja_ss'];
     var enlaces = req.body['enlaces'];
     var id_usuario = req.session.usuario;
+    var id_wf = req.body['id_wf'];
 
 
     var projects = Array(); 
@@ -353,8 +355,50 @@ router.post('/', function(req, res, next) {
             })
         });
     }
+    function actualizarWF(id_wf){
+        return new Promise((resolve,reject) => {
+            userModel.getWorkflowByIDP(id_wf,function(error,result){
+                if(error){
+                    console.log(error);
+                    reject(error)
+                }
+                else{
+                    //res.send(result);
+                    //Buscar el nombre actualizado de la hoja
+                    // Set options
+                    var id_hoja = result[0].ID_HOJA_SMARTSHEET;
+                    var options = {
+                        id: id_hoja // Id of Sheet
+                    };
+                    // Get sheet            
+                    smartsheet.sheets.getSheet(options)
+                    .then(function(sheetInfo) {
+                        var sheet_name = sheetInfo.name;
+                        
+                        var info = {
+                            sheet_name: sheet_name,
+                            id_wf: id_wf
+                        };
+                        userModel.updateWorkFlowP(info,function(error,result2){
+                            if(error){
+                                reject(error)
+                            }
+                            else{
+                                //Se envía el resultado de la lectura incial
+                                resolve(result);
+                            }
+                        });
+                    })
+                    .catch(function(error) {
+                        reject(error);
+                    });
+                }
+            });
+        });
+    }
     async function asyncCall() {
     try{  
+        await actualizarWF(id_wf);
         io.emit('progreso',35);
         io.emit('mensaje','Reading Projects from primavera...');
         projects = await primavera.asyncgetProyectos(id_usuario);

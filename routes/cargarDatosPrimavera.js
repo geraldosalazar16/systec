@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var primavera = require('../models/primavera.js')
+var primavera = require('../models/primavera.js');
 
 router.post('/', function(req, res, next) {
     // Initialize the client cq9nwc3b2z5tlsutxqslb3sl5p
@@ -21,7 +21,7 @@ router.post('/', function(req, res, next) {
         id: id_hoja // Id of Sheet
     };
     
-    var id_proyecto_primavera = req.body['id_proyecto_primavera'];
+    var id_proyecto_primavera = req.body['id_proyecto_primavera'];    
 
     var actividades_primavera = Array(); 
     var activity_code_types = Array();
@@ -41,7 +41,7 @@ router.post('/', function(req, res, next) {
             })
         });
     }
-
+    
     run_main = async function(){
         try{
             actividades_primavera = await getActividades(id_proyecto_primavera,req.session.usuario);

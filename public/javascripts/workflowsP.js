@@ -89,7 +89,8 @@ app.controller('workflowP', ['$scope', '$http','$window','notify', function($sco
                         //Esta es la variable que lo contiene todo
                         var info = {
                             id_hoja_ss: workflow.ID_HOJA_SMARTSHEET,
-                            enlaces: enlaces
+                            enlaces: enlaces,
+                            id_wf: id_wf
                         };
                         //Ahora paso esta variable a la rutina que hace la insercion
                         $http.post('/cargarDatosPortafolio',info).
@@ -219,7 +220,8 @@ app.controller('workflowP', ['$scope', '$http','$window','notify', function($sco
                     var info = {
                         id_proyecto_primavera: workflow.ID_PROYECTO_PRIMAVERA,
                         id_hoja_ss: workflow.ID_HOJA_SMARTSHEET,
-                        factor_duracion: workflow.DURATION_FACTOR
+                        factor_duracion: workflow.DURATION_FACTOR,
+                        id_wf: id_wf
                     };
                     //Ahora paso esta variable a la rutina que hace la insercion
                     $http.post('/cargarDatosPrimavera',info).
