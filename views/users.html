@@ -125,21 +125,20 @@
                                 <input type="text" class="form-control" name="token_ss" id="token_ss" ng-model="formData.token_ss" required
                                 ng-class="{ error: exampleForm.token_ss.$error.required && !exampleForm.$pristine}">
                             </div>
-                            <div class='form-group'>
+                            <div class='form-group' ng-show="false">
                                 <label for="usuario_primavera">Primavera url</label>
-                                <input type="text" class="form-control" name="url_primavera" id="url_primavera" ng-model="formData.url_primavera" required
-                                ng-class="{ error: exampleForm.url_primavera.$error.required && !exampleForm.$pristine}">
+                                <input type="text" class="form-control" name="url_primavera"
+                                 id="url_primavera" ng-model="formData.url_primavera">
                             </div>
-                            <div class='form-group'>
+                            <div class='form-group' ng-show="false">
                                 <label for="usuario_primavera">Primavera user</label>
-                                <input type="text" class="form-control" name="usuario_primavera" id="usuario_primavera" ng-model="formData.usuario_primavera" required
-                                ng-class="{ error: exampleForm.usuario_primavera.$error.required && !exampleForm.$pristine}">
+                                <input type="text" class="form-control" name="usuario_primavera" 
+                                id="usuario_primavera" ng-model="formData.usuario_primavera">
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" ng-show="false">
                                 <label for="pwd_primavera">Primavera password</label>
-                                <input type="password" class="form-control" name="pwd_primavera" id="pwd_primavera" ng-model="formData.pwd_primavera" required
-                                ng-class="{ error: exampleForm.pwd_primavera.$error.required && !exampleForm.$pristine}">
-                            </div>
+                                <input type="password" class="form-control" name="pwd_primavera" 
+                                id="pwd_primavera" ng-model="formData.pwd_primavera">                            </div>
                             <div class="form-group">
                                 <label for="id_perfil">Profile</label>
                                 <select ng-model="formData.id_perfil" ng-options="perfil.ID as perfil.NOMBRE for perfil in Perfiles" 

@@ -116,6 +116,13 @@ app.controller('login', ['$scope', '$http','$window','notify', function($scope, 
                     content: 'User not found. Contact your administrator to get credentials!',
                 });
             }
+            if(msg == 'deny'){
+                $scope.resultado_login = 'Login refused by Smartsheet';
+                $.alert({
+                    title: 'Error!',
+                    content: 'The authentication was refused by Smartsheet',
+                });
+            }
         }
     }
     entryPoint();

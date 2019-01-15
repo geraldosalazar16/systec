@@ -30,10 +30,6 @@
                         Hello, {{nombre_usuario}}
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="./users" ng-if="permisos.administrar_usuarios == 1">Manage users</a>
-                        <a class="dropdown-item" href="./workflows" >Project workflows</a>
-                        <a class="dropdown-item" href="./workflowsP" >Portafolio workflows</a>
-                        <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="./login">Log out</a>
                     </div>
                 </li>
@@ -44,14 +40,12 @@
             <div class="card mt-4" style="width: 100%; height: 100%;">
                 <div class="card-body">
                     <div class="row mt-4 justify-content-center">
-                        <h3 style="font-family: Arial; color: #585E63; font-weight: bold">Please provide Primavera credentials</h3>
+                        <h3 style="font-family: Arial; color: #585E63; font-weight: bold">Please provide your Primavera P6 credentials.</h3>
                     </div>
-                    <div class="row mt-4 justify-content-center">
-                        <button type="button" class="btn btn-link"
-                        ng-click="justificacion()">
-                            <i class="far fa-frown"></i>
-                             Why they ask me for this?
-                        </button>
+                    <div class="row justify-content-center">
+                        <p class="text-info">
+                            We do not store this information for security reasons
+                        </p>
                     </div>
                     
                     <div class="row mt-4 justify-content-center">

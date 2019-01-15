@@ -7,6 +7,9 @@ var con = mysql.createConnection({
     password: "",
     database: "systec"
 });
+
+var crypto = require('crypto');
+
 function obtener_fecha_actual (){
     //Obtener la fecha de guardado
     var today = new Date();
@@ -26,6 +29,71 @@ var userModel = {};
 
 userModel.validarUsuario = function(username,pwd,callback){
     if(con){
+        // Create hash
+        var hash =
+        crypto.createHash('sha256')
+        .update(pwd)
+        .digest('hex');
+
+        var sql = "SELECT * FROM usuarios WHERE CONTRASENA = "+con.escape(hash)+ " AND NOMBRE = " + con.escape(username);
+        con.query(sql, function (err, result) {
+            if (err) 
+                callback(err,null); 
+            else{
+                var usuario;
+                if(result[0]){
+                    if(result[0]['NOMBRE'] == username){
+                        var res = result[0];
+                        //Informacion de permisos
+                        var sql = "SELECT p.NOMBRE,pp.ID_PERFIL,pp.ID_PERMISO,pp.VALOR "+
+                        "FROM perfil_permisos pp INNER JOIN perfiles p ON pp.ID_PERFIl = p.ID "+
+                        "WHERE pp.ID_PERFIL = "+result[0]['ID_PERFIL'];
+                        con.query(sql, function (err, result) {
+                            if (err) 
+                                callback(err,null);
+                            else{
+                                usuario = {
+                                    id: res['ID'],
+                                    username: res['NOMBRE'],
+                                    token: res['TOKEN'],
+                                    usuario_primavera: res['USUARIO_PRIMAVERA'],
+                                    pwd_primavera: res['PWD_PRIMAVERA'],
+                                    url_primavera: res['URL_PRIMAVERA'],
+                                    perfil: result[0]['NOMBRE'],
+                                    autenticado: true,
+                                    permisos: result
+                                };
+                                callback(null,usuario);
+                            }
+                        });
+                    }
+                    else{
+                        usuario = {
+                            id: 0,
+                            username: '',
+                            token: '',
+                            autenticado: false
+                        };
+                        callback(null,usuario);
+                    }
+                }
+                else{
+                    usuario = {
+                        id: 0,
+                        username: '',
+                        token: '',
+                        autenticado: false
+                    };
+                    callback(null,usuario);
+                }
+            }   
+        });
+    }
+}
+userModel.validarUsuarioSesion = function(username,pwd,callback){
+    if(con){
+        //Se valida sin hash ya que esta recibiendo la contraseña de la sesion
+
         var sql = "SELECT * FROM usuarios WHERE CONTRASENA = "+con.escape(pwd)+ " AND NOMBRE = " + con.escape(username);
         con.query(sql, function (err, result) {
             if (err) 
@@ -837,8 +905,15 @@ userModel.getUsuarios = function(callback){
 }
 userModel.guardarUsuario = function(info,callback){
     if(con){
+        
+        // Create hash
+        var hash =
+        crypto.createHash('sha256')
+        .update(info.pwd)
+        .digest('hex');
+
         var sql = "INSERT INTO usuarios (NOMBRE,CORREO,CONTRASENA,TOKEN,USUARIO_PRIMAVERA,PWD_PRIMAVERA,URL_PRIMAVERA, ID_PERFIL) VALUES ("+
-        con.escape(info.nombre_usuario)+","+con.escape(info.correo)+","+con.escape(info.pwd)+","+con.escape(info.token_ss)+","+
+        con.escape(info.nombre_usuario)+","+con.escape(info.correo)+","+con.escape(hash)+","+con.escape(info.token_ss)+","+
         con.escape(info.usuario_primavera)+","+con.escape(info.pwd_primavera)+","+con.escape(info.url_primavera)+","+con.escape(info.id_perfil)+");";
         con.query(sql, function (err, result) {
             if (err) {
@@ -853,9 +928,15 @@ userModel.guardarUsuario = function(info,callback){
 }
 userModel.editarUsuario = function(info,callback){
     if(con){
+        // Create hash
+        var hash =
+        crypto.createHash('sha256')
+        .update(info.pwd)
+        .digest('hex');
+
         var sql = "UPDATE usuarios SET NOMBRE="+con.escape(info.nombre_usuario)+
         ",CORREO="+con.escape(info.correo)+
-        ",CONTRASENA="+con.escape(info.pwd)+
+        ",CONTRASENA="+con.escape(hash)+
         ",TOKEN="+con.escape(info.token_ss)+
         ",USUARIO_PRIMAVERA="+con.escape(info.usuario_primavera)+
         ",PWD_PRIMAVERA="+con.escape(info.pwd_primavera)+
