@@ -174,25 +174,32 @@
                         <div class='col-md-6'>
                             <label class="control-label">Select Primavera Column<span class="required">*</span></label>
                         
-                            <select ng-model="cmbColumnasP6" ng-disabled="bloquear_columna_p6" required="required" id="cmbColumnasP6" ng-change='cambioColumnaP6()'
-                            class="form-control" data-parsley-id="2324" ng-options="columna.NOMBRE for columna in columnasP6 track by columna.ID_INTERFACE">
+                            <select ng-model="cmbColumnasP6" ng-disabled="bloquear_columna_p6" 
+                            required="required" id="cmbColumnasP6" ng-change='cambioColumnaP6()'
+                            class="form-control" data-parsley-id="2324" 
+                            ng-options="columna.NOMBRE for columna in columnasP6 track by columna.ID_INTERFACE">
                                 <!--<option value="">Select a column</option>-->
                             </select>
                         </div>
                         <div class='col-md-6'>
-                                <label class="control-label">Select Smartsheet Column<span class="required">*</span></label>
-                                <select ng-model="cmbColumnasSS" ng-disabled="bloquear_columna_ss" required="required" id="cmbColumnasSS"
-                                class="form-control" data-parsley-id="2324" ng-options="columna.title for columna in columnasSS track by columna.id">
-                                    <!--<option value="">Select a column</option>-->
-                                </select>
-                            </div>
+                            <label class="control-label">Select Smartsheet Column<span class="required">*</span></label>
+                            <select ng-model="cmbColumnasSS" ng-disabled="bloquear_columna_ss" 
+                            required="required" id="cmbColumnasSS"
+                            class="form-control" data-parsley-id="2324" 
+                            ng-options="columna.title for columna in columnasSS track by columna.id">
+                                <!--<option value="">Select a column</option>-->
+                            </select>
+                        </div>
                     </div>
                     <div class = 'row col-md-12' style='margin-top: 15px;'>
-                            <!--
-                            Incluyo todos los posibles filtros y los controlo con ng-show
-                            -->
-                            <label class="control-label col-md-12" ng-show='mostrarSelectFechas||mostrarFiltroProjectCode'>Filter rows by value</label>
-                            <!--Filtro para el status tres valores -->
+                        <!--
+                        Incluyo todos los posibles filtros y los controlo con ng-show
+                        -->
+                        <label class="control-label col-md-12" 
+                        ng-show='mostrarSelectFechas||mostrarFiltroProjectCode'>
+                            Filter rows by value
+                        </label>
+                        <!--Filtro para el status tres valores -->
                             <!--
                             <select ng-model="cmbStatus" class="form-control" ng-change='cambioStatus()' ng-show='mostrarFiltroStatus'> 
                                 <option value="All" >All</option>
@@ -204,7 +211,8 @@
                             
                             <!--Filtro para fechas -->
                             <div class='col-md-4'>
-                                <select ng-model="cmbSelectFechas" class="form-control" ng-change='cambioSelectFechas()' 
+                                <select ng-model="cmbSelectFechas" class="form-control" 
+                                ng-change='cambioSelectFechas()' 
                                 ng-show='mostrarSelectFechas' id='cmbSelectFechas' required> 
                                     <option value="Any">Any</option>
                                     <option value="Before">Before</option>
@@ -214,11 +222,13 @@
                                 </select>
                             </div>
                             <div class='col-md-8'>
-                                <input type='text' ng-model="inputDatePicker" id='inputDatePicker' class='datepicker-here form-control'
+                                <input type='text' ng-model="inputDatePicker" id='inputDatePicker' 
+                                class='datepicker-here form-control'
                                 data-range='false' data-language='en' ng-show='mostrarInputFechas'/>
                             </div>
                             <!--Filtro para project codes -->
-                            <select ng-model="cmbProjectCode" class="form-control" ng-change='cambioProjectCode()' 
+                            <select ng-model="cmbProjectCode" class="form-control" 
+                            ng-change='cambioProjectCode()' 
                             ng-show='mostrarFiltroProjectCode' 
                             ng-options= 'ac as ac.CodeValue for ac in ProjectCodesFiltrados '> 
                             </select>
@@ -228,7 +238,7 @@
                 <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" ng-click="guardarEnlace()" id="btnGuardarEnlace"
-                ng-disabled="!exampleForm.$valid">{{accion_enlace}}</button>
+                >{{accion_enlace}}</button>
                 </div>
             </div>
         </div>

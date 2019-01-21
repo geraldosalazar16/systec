@@ -921,6 +921,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 $scope.mostrarFiltroStatus = false;
             }
             if(tipo_columna == 'project_code_type'){
+                mostrarFiltros('project_code_type');
                 //Seleccionar los activity codes que tienen como CodeTypeObject el id_columna
                 $scope.ProjectCodesFiltrados = Array();
                 var inicial = {
@@ -954,7 +955,6 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 $scope.mostrarFiltroProjectCode = false;
             }
             if(nombre.includes('Date') || nombre.includes('date')){
-            
                 $scope.mostrarSelectFechas = true;
                 if($scope.tipo_filtro == 'Any'){
                     $scope.mostrarInputFechas = false;
@@ -977,6 +977,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             }
             else{
                 $scope.mostrarSelectFechas = false;
+                $scope.mostrarInputFechas = false;
             }
             
             $scope.accion_enlace = 'Save';
@@ -989,6 +990,26 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             
         });
     }
+
+    function mostrarFiltros(tipo_enlace){
+        switch (tipo_enlace) {
+            case 'Status':
+                $scope.mostrarFiltroStatus = true;
+                $scope.mostrarFiltroProjectCode = false;
+                break;
+            case 'project_code_type':
+                $scope.mostrarFiltroStatus = false;
+                $scope.mostrarFiltroProjectCode = true;
+                break;
+            case 'date':
+                $scope.mostrarFiltroStatus = false;
+                $scope.mostrarFiltroProjectCode = true;
+                break;    
+            default:
+                break;
+        }
+    }
+
     function onSelect2(){
         $(".select2_single").select2({});
     }
@@ -1075,12 +1096,12 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             $scope.cambioHojas();
  
             result = await getEnlacesByWfPortafolio();
-            $scope.Enlaces = ordenar_alfabeticamente($scope.Enlaces,'NOMBRE_P6');
             if(result.data[0]){
                 result.data.forEach(enlace => {
                     $scope.agregarEnlace(enlace);
                 });
             }   
+            $scope.Enlaces = ordenar_alfabeticamente($scope.Enlaces,'NOMBRE_P6');
             var cols = await cargarColumnasP6();
             $scope.project_codes = await getListaPosiblesValoresProjectCodes();
             $scope.project_codes = $scope.project_codes.data.ProjectCode;
