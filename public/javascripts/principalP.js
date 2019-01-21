@@ -886,7 +886,9 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             var id_columna_p6 = response.data[0]['ID_COLUMNA_PRIMAVERA'];
             for(i=0;i<$scope.columnasP6.length;i++){
                 if($scope.columnasP6[i].ID.toString() == id_columna_p6){
-                   $scope.cmbColumnasP6 = $scope.columnasP6[i];
+                    if($scope.columnasP6[i].TIPO == response.data[0]['TIPO_COLUMNA_PRIMAVERA']){
+                        $scope.cmbColumnasP6 = $scope.columnasP6[i];
+                    }                   
                }
             }
             var id_columna_ss = response.data[0]['COLUMNA_SMARTSHEET'];
@@ -949,7 +951,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 }
             }
             else{
-                $scope.mostrarFiltroActityCode = false;
+                $scope.mostrarFiltroProjectCode = false;
             }
             if(nombre.includes('Date') || nombre.includes('date')){
             
@@ -976,6 +978,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             else{
                 $scope.mostrarSelectFechas = false;
             }
+            
             $scope.accion_enlace = 'Save';
             $scope.id_enlace_actual = id_enlace;
 
@@ -983,6 +986,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             $scope.columnasSS = ordenar_alfabeticamente($scope.columnasSS,'title');
             $scope.loading.close();
             $("#modalInsertarActualizar").modal("show");
+            
         });
     }
     function onSelect2(){
