@@ -63,7 +63,7 @@ var getProyectoById = require('./routes/getProyectoById');
 var getPortafolio = require('./routes/getPortafolio');
 var getListaPosiblesValoresProjectCodes = require('./routes/getListaPosiblesValoresProjectCodes');
 var getRelacionProyectosCodigos = require('./routes/getRelacionProyectosCodigos');
-
+var getUDFsAllProjects = require('./routes/getUDFsAllProjects');
 var credPrimavera = require('./routes/credPrimavera');
 var validarCredenciales = require('./routes/validarCredenciales');
 var setP6 = require('./routes/setP6');
@@ -163,7 +163,7 @@ app.use('/getProyectoById',getProyectoById);
 app.use('/getPortafolio',getPortafolio);
 app.use('/getListaPosiblesValoresProjectCodes',getListaPosiblesValoresProjectCodes);
 app.use('/getRelacionProyectosCodigos',getRelacionProyectosCodigos);
-
+app.use('/getUDFsAllProjects',getUDFsAllProjects);
 app.use('/credPrimavera',credPrimavera);
 app.use('/validarCredenciales',validarCredenciales);
 app.use('/setP6',setP6);

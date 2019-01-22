@@ -1070,6 +1070,24 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             });
         }) 
     }
+    //Funciones UDF
+    function getUDFsAllProjects(){
+        return new Promise((resolve,reject) => {
+            //Buscar las tablas en la base de datos
+            $http.get('/getUDFsAllProjects').
+            then(function(response){
+                if(response.data == 'error'){
+                    reject(response);
+                }
+                else{
+                    resolve(response)
+                }
+            }).
+            catch(function(err){
+                reject(err);
+            });
+        }) 
+    }
     onSelect2();
     async function carga_inicial(){
             
@@ -1107,6 +1125,8 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             $scope.project_codes = $scope.project_codes.data.ProjectCode;
             var relProyectosCodigos = await getRelacionProyectosCodigos();
             relProyectosCodigos = relProyectosCodigos.data.ProjectCodeAssignment;
+            //Cargar todos los UDFs
+            //var udfs = await getUDFsAllProjects();
             //Arreglo pàra almacenar las posibles columnas
             var columnas = Array();
             //Cargo el primer valor para que tenga algo
@@ -1141,6 +1161,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                     found = 0;
                 }
             });
+            
             //Agrego columnas adicionales a las encontradas en la base de datos que son fijas
             if(columnas[0]){
                 columnas.forEach(columna => {
