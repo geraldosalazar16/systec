@@ -27,10 +27,15 @@ app.controller('workflowP', ['$scope', '$http','$window','notify', function($sco
         eliminar_wfP: sessionStorage.eliminar_wfP
     }
     
-    $scope.agregarWorkFlow = function(){
-        sessionStorage.accion = 'insertar';
-        sessionStorage.id_wf = 0;
-        $window.location.href = 'mainP';
+    $scope.agregarWorkFlow = function(tipo){
+        if(tipo == 'standard'){
+            sessionStorage.accion = 'insertar';
+            sessionStorage.id_wf = 0;
+            $window.location.href = 'mainP';
+        } else if (tipo == 'template') {
+
+        }
+        
     }
     function cargarWorkFlows(){
         loading = $.alert({
