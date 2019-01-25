@@ -41,6 +41,10 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
     $scope.Enlaces = Array();
     $scope.Proyectos = Array();
     $scope.columnasP6 = Array();
+    $scope.columnasP6Fijas = Array();
+    $scope.columnasP6Codes = Array();
+    $scope.columnasP6UDFs = Array();
+    $scope.columnasP6Todas = Array();
     $scope.columnasSS = Array();
     $scope.Hojas = Array();
 
@@ -185,13 +189,15 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
         x[n].className += " active";
       }
     //Fin del control de los tabs
-    
+    /*
     function setDatePicker(){
         $('#inputDatePicker').datepicker({
             language: 'en',
             minDate: new Date() // Now can select only dates, which goes after today
         })
     }
+    */
+    /*
     function cargarDatosSS(){
         //Obtener cual es la hoja seleccionada
         var hoja_seleccionada = $scope.cmbHojas;
@@ -260,6 +266,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             });
         }
     }
+    */
     function getHojas(){
         return new Promise((resolve,reject) => {
             $http.post('/leer')
@@ -284,6 +291,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             .catch((error) => reject(error))
         });
     }
+    /*
     async function cargarHojas(){
         $scope.Hojas = await getHojas();
         $scope.Hojas = $scope.Hojas.data;
@@ -299,6 +307,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 $scope.hojas_listas = 0;
             }
     }
+    */
     function cargarWorkflowPortafolio(){
         return new Promise((resolve,reject) => {
             $http.get('/getWorkflowByIDP',{params: {id_wf:$scope.id_wf}})
@@ -309,6 +318,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             console.log(err);
         });
     }
+    /*
     function cargarCalendario(){
         return new Promise((resolve,reject) => {
             $http.get('/getCalendario',{params: {id_calendario:$scope.proyecto_actual.ActivityDefaultCalendarObjectId}})
@@ -337,6 +347,8 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             .catch((error) => reject(error))
         });
     }
+    */
+    /*
     function getRelacionesActividadCodigo(){
         return new Promise((resolve,reject) => {
             $http.get('/getRelacionesActividadCodigo',{params: {id_proyecto:$scope.proyecto_actual.ObjectId}})
@@ -344,6 +356,8 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             .catch((error) => reject(error))
         });
     }
+    */
+    /*
     function cargarActividades(){
         return new Promise((resolve,reject) => {
             var promiseActividades = getActividades();
@@ -409,6 +423,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             });
         });
     }
+    */
     function getProyectos(){
         return new Promise((resolve,reject) => {
             $http.get('/getPortafolio')
@@ -416,22 +431,19 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             .catch((error) => reject(error))
         });
     }
+    /*
     function getProyectoById(id_proyecto,llenar_listado){
         return new Promise((resolve,reject) => {
             $http.get('/getProyectoById',{params:{id_proyecto: id_proyecto}})
             .then((result) => {
-                /*                
-                if(llenar_listado){
-                    $scope.Proyectos = Array();
-                    $scope.Proyectos[0] = result.data.Project;
-                    $scope.cmbProyectos = $scope.Proyectos[0];
-                }   
-                */             
+             
                 resolve(result)
             })
             .catch((error) => reject(error))
         });
     }
+    */
+   /*
     async function cargarProyectos(){
         $scope.Proyectos = await getProyectos();
         $scope.Proyectos = $scope.Proyectos.data.Project;
@@ -446,24 +458,10 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             $scope.loading.close();
             $scope.proyectos_listos = 0;
         }
-        /*
-        $http.get('/leerProyectosP6')
-        .then(function(response) {
-            $scope.Proyectos = response.data.Project;
-            $scope.proyectos_listos = 1;
-            //Si estan ambos cargados reviso si es edicion para cargar la informacion
-            if($scope.hojas_listas == 1 && $scope.proyectos_listos == 1){
-                //Si es edicion hay que cargar la información del workflow
-                if($scope.accion == 'editar'){
-                    $scope.cargarWorkflow();
-                }
-                //Cierro el loading
-                $scope.loading.close();
-                $scope.proyectos_listos = 0;
-            }
-        });
-        */
+        
     }
+    */
+    /*
     function getEnlacesByWf(){
         return new Promise((resolve,reject) => {
             var params = {
@@ -480,6 +478,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             })
         });
     }
+    */
     function getEnlacesByWfPortafolio(){
         return new Promise((resolve,reject) => {
             var params = {
@@ -495,6 +494,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             })
         });
     }
+    /*
     $scope.cambioProyecto = async function(){
         $scope.loading = $.dialog({
             icon: 'fa fa-spinner fa-spin',
@@ -511,6 +511,8 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             $scope.loading.close();
         }    
     }
+    */
+   /*
     function prcambioProyecto(){
         $scope.proyecto_actual = $scope.cmbProyectos;
         
@@ -538,6 +540,8 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             });
         });
     }
+    */
+   /*
     function prcargarProyecto(){
         $scope.proyecto_actual = $scope.cmbProyectos;
 
@@ -564,6 +568,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             });            
         });
     }
+    */
     $scope.cambioHojas = function(){
         prcambioHojas().
         then(function(result){
@@ -616,6 +621,23 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
         }
         else{
             $scope.mostrarFiltroProjectCode = false;
+        }
+        if(tipo_columna == 'udf'){
+            $scope.mostrarFiltroUDF = true;
+        
+            var tipo_dato = $scope.cmbColumnasP6.TIPO_DATO;
+            if(tipo_dato == 'Cost' || tipo_dato == 'Double' || tipo_dato == 'Integer' || tipo_dato == 'Number'){
+                $scope.mostrarcmbTipoFiltroUDFNum = true;
+                $scope.cmbTipoFiltroUDFNum = 'Any';
+                $scope.mostrarcmbTipoFiltroUDFText = false;
+            } else if(tipo_dato == 'Text'){
+                $scope.mostrarcmbTipoFiltroUDFNum = false;
+                $scope.mostrarcmbTipoFiltroUDFText = true;
+                $scope.cmbTipoFiltroUDFText = 'Any';
+            }
+        } else {
+            $scope.mostrarcmbTipoFiltroUDFNum = false;
+            $scope.mostrarcmbTipoFiltroUDFText = false;
         }
         if(nombre.includes('Date') || nombre.includes('date')){
             $scope.tipo_filtro = 'Any';
@@ -683,6 +705,13 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             //$scope.inputDatePicker = hoy;
         }
     }
+    $scope.cambioFiltroUDF = function(emisor){
+        if(emisor == 'num'){
+            $scope.tipo_filtro = $scope.cmbTipoFiltroUDFNum;
+        } else if(emisor == 'text'){
+            $scope.tipo_filtro = $scope.cmbTipoFiltroUDFText;
+        }
+    }
     $scope.agregarEnlace = function(data){
         var enlace = {
             id: data.ID,
@@ -694,6 +723,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             NOMBRE_SS: data.NOMBRE_COLUMNA_SMARTSHEET,
             tipo_filtro: data.TIPO_FILTRO,
             valor_filtro: data.VALOR1_FILTRO,
+            valor_filtro2: data.VALOR2_FILTRO,
             logica_filtro: data.LOGICA_FILTRO,
             descripcion: data.DESCRIPCION
         };
@@ -716,15 +746,37 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 $scope.valor_filtro = $("#inputDatePicker").val();
             }
         }
+        else if($scope.mostrarFiltroUDF == true){
+            //Necesito el tipo de dato del udf
+            $scope.tipo_dato = $scope.cmbColumnasP6.TIPO_DATO;
+            if($scope.mostrarcmbTipoFiltroUDFNum == true){
+                if($scope.cmbTipoFiltroUDFNum == 'Between'){
+                    $scope.valor_filtro = $scope.txtValorFiltroUDFNum1;
+                    $scope.valor_filtro2 = $scope.txtValorFiltroUDFNum2;
+                } else if($scope.cmbTipoFiltroUDFNum == 'Any'){
+                    $scope.valor_filtro = 'Cualquier valor';
+                } else {
+                    $scope.valor_filtro = $scope.txtValorFiltroUDFNum1;
+                }                
+            }
+            if($scope.mostrarcmbTipoFiltroUDFText == true){
+                if($scope.cmbTipoFiltroUDFText == 'Any'){
+                    $scope.valor_filtro = 'Cualquier valor';
+                } else {
+                    $scope.valor_filtro = $scope.txtValorFiltroUDFText;
+                }                                
+            }
+        }
         else{
             $scope.valor_filtro = 'Cualquier valor';
         }
         //Construir la descripcion del filtro
         var descripcion = '';
-        if($scope.tipo_filtro != 'Any'){
+        if($scope.tipo_filtro != 'Any' && $scope.tipo_filtro != 'Between'){
             descripcion = $scope.tipo_filtro+' '+$scope.valor_filtro+' '+$scope.cmbLogica;
-        }
-        else{
+        } else if ($scope.tipo_filtro == 'Between'){
+            descripcion = $scope.tipo_filtro + ' ' + $scope.valor_filtro + ' AND ' + $scope.valor_filtro2 + ' ' +$scope.cmbLogica;
+        } else {
             descripcion = 'Any value '+$scope.cmbLogica;
         }
         var id;
@@ -744,10 +796,12 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             NOMBRE_SS: $scope.cmbColumnasSS.title,
             tipo_filtro: $scope.tipo_filtro,
             valor_filtro: $scope.valor_filtro,
+            valor_filtro2: $scope.valor_filtro2,
             logica_filtro: $scope.cmbLogica,
             descripcion: descripcion,
             id_proyecto_primavera : 0,
-            id_hoja_smartsheet : $scope.wf_actual['ID_HOJA_SMARTSHEET']
+            id_hoja_smartsheet : $scope.wf_actual['ID_HOJA_SMARTSHEET'],
+            tipo_dato: $scope.tipo_dato
         };
         //Si es edicion lo guardo si es modificacion lo modifico, esto lo se con el id (0 nuevo != 0 modificacion)
         $http.post('/almacenarEnlacePortafolio',enlace)
@@ -819,6 +873,16 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
         });
     }
     $scope.insertarEnlace = function(){
+        //para insercion se muestra el combo de tipos de columna
+        $scope.mostrarCmbTipoColumna = true;
+        $scope.cmbTipoColumna = 'fija';
+        $scope.columnasP6 = $scope.columnasP6Fijas;
+        $scope.cmbTipoFiltroUDFNum = 'Any';
+        $scope.cmbTipoFiltroUDFText = 'Any';
+        $scope.txtValorFiltroUDFNum1 = "";
+        $scope.txtValorFiltroUDFNum2 = "";
+        $scope.txtValorFiltroUDFText = "";
+
         if(!$scope.cmbHojas){
            $.alert({
                 title: 'Error!',
@@ -844,6 +908,11 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             $scope.cmbLogica = 'Inclusive'; //AND por defecto
             $scope.mostrarLogica = false; //Por defecto no aparece
             $scope.accion_enlace = 'Create';
+
+            //UDF
+            $scope.mostrarFiltroUDF = false;
+            $scope.mostrarcmbTipoFiltroUDFNum = false;
+            $scope.cmbTipoFiltroUDFText = false;
 
             $scope.columnasP6 = ordenar_alfabeticamente($scope.columnasP6,'NOMBRE');
             $scope.columnasSS = ordenar_alfabeticamente($scope.columnasSS,'title');
@@ -879,15 +948,22 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
 
         $scope.bloquear_columna_p6 = true;
         $scope.bloquear_columna_ss = true;
+        //para edición no se muestra el combo de tipos de columna
+        $scope.mostrarCmbTipoColumna = false;
+        $scope.columnasP6 = $scope.columnasP6Todas; //Necesario para que aparezcan los nombres de las columnas
 
         //Buscar la información del enlace en la base de datos
         $http.get('/getEnlaceByIdPortafolio',{params: {id_enlace:id_enlace}}).
         then(function(response){
             var id_columna_p6 = response.data[0]['ID_COLUMNA_PRIMAVERA'];
-            for(i=0;i<$scope.columnasP6.length;i++){
-                if($scope.columnasP6[i].ID.toString() == id_columna_p6){
-                    if($scope.columnasP6[i].TIPO == response.data[0]['TIPO_COLUMNA_PRIMAVERA']){
-                        $scope.cmbColumnasP6 = $scope.columnasP6[i];
+            $scope.tipo_filtro = response.data[0]['TIPO_FILTRO'];
+            //Solo para UDF
+            var tipo_dato = response.data[0]['TIPO_DATO'];
+
+            for(i=0;i<$scope.columnasP6Todas.length;i++){
+                if($scope.columnasP6Todas[i].ID.toString() == id_columna_p6){
+                    if($scope.columnasP6Todas[i].TIPO == response.data[0]['TIPO_COLUMNA_PRIMAVERA']){
+                        $scope.cmbColumnasP6 = $scope.columnasP6Todas[i];
                     }                   
                }
             }
@@ -896,8 +972,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 if($scope.columnasSS[i].id.toString() == id_columna_ss){
                    $scope.cmbColumnasSS = $scope.columnasSS[i];
                }
-            }
-            $scope.tipo_filtro = response.data[0]['TIPO_FILTRO'];
+            }            
             
             //Unav vez que tengo el id de la columna la busco para hacer la validacion 
             //de los filtros que le corresponden
@@ -979,13 +1054,41 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 $scope.mostrarSelectFechas = false;
                 $scope.mostrarInputFechas = false;
             }
-            
+            if(tipo_columna == 'udf'){
+                if(tipo_dato == 'Cost' || tipo_dato == 'Double' || tipo_dato == 'Integer'){
+                    $scope.mostrarFiltroUDF = true;
+                    $scope.mostrarcmbTipoFiltroUDFNum = true;
+                    $scope.mostrarcmbTipoFiltroUDFText = false;
+
+                    $scope.cmbTipoFiltroUDFNum = $scope.tipo_filtro;
+                    $scope.txtValorFiltroUDFNum1 = parseFloat(response.data[0]['VALOR1_FILTRO']);
+                    $scope.txtValorFiltroUDFNum2 = parseFloat(response.data[0]['VALOR2_FILTRO']);
+                } else if (tipo_dato = 'Text'){
+                    $scope.mostrarFiltroUDF = true;
+                    $scope.mostrarcmbTipoFiltroUDFNum = false;
+                    $scope.mostrarcmbTipoFiltroUDFText = true;
+
+                    $scope.cmbTipoFiltroUDFText = $scope.tipo_filtro;
+                    var valor1;
+                    if(response.data[0]['VALOR1_FILTRO'] == 'Cualquier valor'){
+                        valor1 = "";
+                    } else {
+                        valor1 = response.data[0]['VALOR1_FILTRO'];
+                    }
+                    $scope.txtValorFiltroUDFText = valor1;
+                }
+            } else {
+                //UDF
+                $scope.mostrarFiltroUDF = false;
+                $scope.mostrarcmbTipoFiltroUDFNum = false;
+                $scope.cmbTipoFiltroUDFText = false;
+            }
             $scope.accion_enlace = 'Save';
             $scope.id_enlace_actual = id_enlace;
 
             $scope.columnasP6 = ordenar_alfabeticamente($scope.columnasP6,'NOMBRE');
             $scope.columnasSS = ordenar_alfabeticamente($scope.columnasSS,'title');
-            $scope.loading.close();
+            $scope.closeLoading();            
             $("#modalInsertarActualizar").modal("show");
             
         });
@@ -1071,10 +1174,10 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
         }) 
     }
     //Funciones UDF
-    function getUDFsAllProjects(){
+    function getUDFs(){
         return new Promise((resolve,reject) => {
             //Buscar las tablas en la base de datos
-            $http.get('/getUDFsAllProjects').
+            $http.get('/getUDFs?area=Project').
             then(function(response){
                 if(response.data == 'error'){
                     reject(response);
@@ -1125,8 +1228,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             $scope.project_codes = $scope.project_codes.data.ProjectCode;
             var relProyectosCodigos = await getRelacionProyectosCodigos();
             relProyectosCodigos = relProyectosCodigos.data.ProjectCodeAssignment;
-            //Cargar todos los UDFs
-            //var udfs = await getUDFsAllProjects();
+            
             //Arreglo pàra almacenar las posibles columnas
             var columnas = Array();
             //Cargo el primer valor para que tenga algo
@@ -1161,19 +1263,38 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                     found = 0;
                 }
             });
-            
-            //Agrego columnas adicionales a las encontradas en la base de datos que son fijas
+            //Cargar todos los UDFs
+            var udfs = await getUDFs();
+            udfs = udfs.data.UDFType;
+
+            var columnasUDFs = [];
+            udfs.forEach(udf => {
+                columnasUDFs.push({
+                    TIPO: 'udf',
+                    ID: udf.ObjectId,
+                    NOMBRE: udf.Title,
+                    TIPO_WORKFLOW: 'PORTAFOLIO',
+                    TIPO_DATO: udf.DataType
+                });
+            });
+            //Agrego columnas adicionales (codes) a las encontradas en la base de datos que son fijas
             if(columnas[0]){
                 columnas.forEach(columna => {
-                    agregar_columna_p6(columna);
+                    agregar_columna_p6('code',columna);
                 });
             }
             //Agrego las columnas fijas
             if(cols.data[0]){
                 cols.data.forEach(columna => {
-                    agregar_columna_p6(columna);
+                    agregar_columna_p6('fija',columna);
                 });
-            }       
+            }    
+            //Agrego las columnas de udf
+            if(columnasUDFs[0]){
+                columnasUDFs.forEach(columna => {
+                    agregar_columna_p6('udf',columna);
+                });
+            }    
         }
         else{
             $scope.loading = $.dialog({
@@ -1230,31 +1351,108 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                     found = 0;
                 }
             });
+            //Cargar todos los UDFs
+            var udfs = await getUDFs();
+            udfs = udfs.data.UDFType;
+
+            var columnasUDFs = [];
+            udfs.forEach(udf => {
+                columnasUDFs.push({
+                    TIPO: 'udf',
+                    ID: udf.ObjectId,
+                    NOMBRE: udf.Title,
+                    TIPO_WORKFLOW: 'PORTAFOLIO',
+                    TIPO_DATO: udf.DataType
+                });
+            });
+            //Agrego columnas adicionales (codes) a las encontradas en la base de datos que son fijas
+            if(columnas[0]){
+                columnas.forEach(columna => {
+                    agregar_columna_p6('code',columna);
+                });
+            }
             //Agrego columnas adicionales a las encontradas en la base de datos que son fijas
             if(columnas[0]){
                 columnas.forEach(columna => {
-                    agregar_columna_p6(columna);
+                    agregar_columna_p6('code',columna);
                 });
             }
             //Agrego las columnas fijas
             if(cols.data[0]){
                 cols.data.forEach(columna => {
-                    agregar_columna_p6(columna);
+                    agregar_columna_p6('fija',columna);
                 });
             }
+            //Agrego las columnas de udf
+            if(columnasUDFs[0]){
+                columnasUDFs.forEach(columna => {
+                    agregar_columna_p6('udf',columna);
+                });
+            } 
         }
-        $scope.loading.close();
+        $scope.closeLoading();
     }
-    function agregar_columna_p6(columna){
-        var consecutivo = $scope.columnasP6.length+1;
-        var mapeo = {
-            ID:columna['ID'],
-            NOMBRE:columna['NOMBRE'],
-            TIPO:columna['TIPO'],
-            TIPO_WORKFLOW:columna['TIPO_WORKFLOW'],
-            ID_INTERFACE: consecutivo
+    function agregar_columna_p6(tipo_columna,columna){
+        var consecutivo = $scope.columnasP6Todas.length+1;
+        var col;
+        if(tipo_columna == 'udf'){
+            var col = {
+                ID:columna['ID'],
+                NOMBRE:columna['NOMBRE'],
+                TIPO:columna['TIPO'],
+                TIPO_WORKFLOW:columna['TIPO_WORKFLOW'],
+                ID_INTERFACE: consecutivo,
+                TIPO_DATO: columna['TIPO_DATO']
+            }
+        } else {
+            col = {
+                ID:columna['ID'],
+                NOMBRE:columna['NOMBRE'],
+                TIPO:columna['TIPO'],
+                TIPO_WORKFLOW:columna['TIPO_WORKFLOW'],
+                ID_INTERFACE: consecutivo
+            }
+        }        
+        $scope.columnasP6Todas.push(col);
+
+        switch (tipo_columna) {
+            case 'fija':
+                //var consecutivo = $scope.columnasP6Fijas.length+1;
+                var mapeo = {
+                    ID:columna['ID'],
+                    NOMBRE:columna['NOMBRE'],
+                    TIPO:columna['TIPO'],
+                    TIPO_WORKFLOW:columna['TIPO_WORKFLOW'],
+                    ID_INTERFACE: consecutivo
+                }
+                $scope.columnasP6Fijas.push(mapeo);
+                break;
+            case 'code':
+                //var consecutivo = $scope.columnasP6Codes.length+1;
+                var mapeo = {
+                    ID:columna['ID'],
+                    NOMBRE:columna['NOMBRE'],
+                    TIPO:columna['TIPO'],
+                    TIPO_WORKFLOW:columna['TIPO_WORKFLOW'],
+                    ID_INTERFACE: consecutivo
+                }
+                $scope.columnasP6Codes.push(mapeo);
+                break;
+            case 'udf':
+                //var consecutivo = $scope.columnasP6UDFs.length+1;
+                var mapeo = {
+                    ID:columna['ID'],
+                    NOMBRE:columna['NOMBRE'],
+                    TIPO:columna['TIPO'],
+                    TIPO_WORKFLOW:columna['TIPO_WORKFLOW'],
+                    ID_INTERFACE: consecutivo,
+                    TIPO_DATO: columna['TIPO_DATO']
+                }
+                $scope.columnasP6UDFs.push(mapeo);
+                break;
+            default:
+                break;
         }
-        $scope.columnasP6.push(mapeo);
     }
     function ordenar_alfabeticamente(list,field){
         return list.sort(function (a, b) {
@@ -1268,5 +1466,25 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             return 0;
           });
     } 
+    $scope.cambioTipoColumna = function(){
+        switch ($scope.cmbTipoColumna) {
+            case 'fija':
+                $scope.columnasP6 = $scope.columnasP6Fijas;     
+                break;
+            case 'code':
+                $scope.columnasP6 = $scope.columnasP6Codes;
+                break;
+            case 'udf':
+                $scope.columnasP6 = $scope.columnasP6UDFs;
+                break;
+            default:
+                break;
+        }
+    }
+    $scope.closeLoading = function(){
+        if($scope.loading){
+            $scope.loading.close();
+        }
+    }
     carga_inicial();
 }]);

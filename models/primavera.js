@@ -852,6 +852,48 @@ primavera.asyncgetRelacionProyectosCodigos = function(usuario){
   });         
 }
 
+primavera.getUDFs = function(area,usuario,callback){
+    var url = usuario.url_primavera;
+    var url_ws = url+'UDFTypeService?wsdl';
+
+  var token_xml =   '<wsse:Security  xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">'+
+                        '<wsse:UsernameToken wsu:Id="UsernameToken-8A9E7449615BCD7075152458094990582">'+
+                        '<wsse:Username>'+usuario.usuario_primavera+'</wsse:Username>'+
+                        '<wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">'+usuario.pwd_primavera+'</wsse:Password>'+
+                        '</wsse:UsernameToken>'+
+                    '</wsse:Security>';
+  
+                    soap.createClient(url_ws,function(err, client) {
+                        if(err){
+                          throw err;
+                        }
+                        else{
+                          client.addSoapHeader(token_xml);
+                          var args = {
+                            Field:[
+                                'DataType',
+                                'IsCalculated',
+                                'IsConditional',
+                                'IsSecureCode',
+                                'ObjectId',
+                                'SubjectArea',
+                                'Title',              
+                            ],
+                            Filter: "SubjectArea='"+area+"'"
+                          }; 
+                          client.ReadUDFTypes(args,function(err, result,rawResponse, soapHeader, rawRequest) {
+                              if(err){
+                                  callback(err,null);
+                              }
+                              else{
+                                  callback(null,result);
+                              }
+                          });
+                        }
+                    }); 
+           
+}
+
 primavera.getUDFsAllProjects = function(usuario,callback){
     var url = usuario.url_primavera;
     var url_ws = url+'UDFValueService?wsdl';
@@ -908,55 +950,7 @@ primavera.getUDFsAllProjects = function(usuario,callback){
                           });
                         }
                     }); 
-       /*             
-    return new Promise((resolve,reject) => {
-        soap.createClient(url_ws,function(err, client) {
-            if(err){
-              reject(err);
-            }
-            else{
-              client.addSoapHeader(token_xml);
-              var args = {
-                  Field:[
-                      'CodeValue',
-                      'ConditionalIndicator',
-                      'Cost',
-                      'CreateDate',
-                      'CreateUser',
-                      'Description',
-                      'Double',
-                      'FinishDate',
-                      'ForeignObjectId',
-                      'Indicator',
-                      'Integer',
-                      'IsBaseline',
-                      'IsTemplate',
-                      'IsUDFTypeCalculated',
-                      'IsUDFTypeConditional',
-                      'LastUpdateDate',
-                      'LastUpdateUser',
-                      'ProjectObjectId',
-                      'StartDate', 
-                      'Text',
-                      'UDFCodeObjectId', 
-                      'UDFTypeDataType',
-                      'UDFTypeObjectId',  
-                      'UDFTypeSubjectArea', 
-                      'UDFTypeTitle',               
-                  ]
-              }; 
-              client.ReadUDFValues(args,function(err, result,rawResponse, soapHeader, rawRequest) {
-                  if(err){
-                      reject(err);
-                  }
-                  else{
-                      resolve(result);
-                  }
-              });
-            }
-        }); 
-    }); 
-    */      
+           
 }
 
 module.exports = primavera;
