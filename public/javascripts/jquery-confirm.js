@@ -231,7 +231,7 @@ var jconfirm, Jconfirm;
             this.$jconfirmBox = this.$body = this.$el.find('.jconfirm-box');
             this.$jconfirmBg = this.$el.find('.jconfirm-bg');
             this.$title = this.$el.find('.jconfirm-title');
-            this.$titleContainer = this.$el.find('.jconfirm-title-c');
+            this.$titleContainer = this.$el.find('.jconfirm-titlle-c');
             this.$content = this.$el.find('div.jconfirm-content');
             this.$contentPane = this.$el.find('.jconfirm-content-pane');
             this.$icon = this.$el.find('.jconfirm-icon-c');
@@ -1044,12 +1044,14 @@ var jconfirm, Jconfirm;
             if (this.draggable) {
                 $(window).unbind('mousemove.' + this._id);
                 $(window).unbind('mouseup.' + this._id);
-                this.$titleContainer.unbind('mousedown');
+                if(this.$titleContainer)
+                    this.$titleContainer.unbind('mousedown');
             }
-
-            that.$el.removeClass(that.loadedClass);
+            if(that.$el)
+                that.$el.removeClass(that.loadedClass);
             $('body').removeClass('jconfirm-no-scroll-' + that._id);
-            that.$jconfirmBoxContainer.removeClass('jconfirm-no-transition');
+            if(that.$jconfirmBoxContainer)
+                that.$jconfirmBoxContainer.removeClass('jconfirm-no-transition');
 
             setTimeout(function () {
                 that.$body.addClass(that.closeAnimationParsed);

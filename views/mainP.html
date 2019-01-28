@@ -17,8 +17,10 @@
   <link rel="stylesheet" href="stylesheets/fileinput.min.css">
   <link rel="stylesheet" href="stylesheets/datepicker.min.css">
   <link rel="stylesheet" href="stylesheets/jquery-confirm.min.css">
- 
+  <!----><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" rel="stylesheet" />
+  <!--<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">-->
   <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+  
 </head>
 <body ng-controller="principal" style="background: #43617E">
     <!-- Este era el loader viejo
@@ -187,7 +189,8 @@
                             <label class="control-label">Select Primavera Column<span class="required">*</span></label>
                         
                             <select ng-model="cmbColumnasP6" ng-disabled="bloquear_columna_p6" 
-                            required="required" id="cmbColumnasP6" ng-change='cambioColumnaP6()'
+                            required="required" id="cmbColumnasP6" 
+                            ng-change='cambioColumnaP6()'
                             class="form-control" data-parsley-id="2324" 
                             ng-options="columna.NOMBRE for columna in columnasP6 track by columna.ID_INTERFACE">
                                 <!--<option value="">Select a column</option>-->
@@ -228,7 +231,8 @@
                         <div class='col-md-8'>
                                 <input type='text' ng-model="inputDatePicker" id='inputDatePicker' 
                                 class='datepicker-here form-control'
-                                data-range='false' data-language='en' ng-show='mostrarInputFechas'/>
+                                data-range='false' data-language='en' 
+                                ng-show='mostrarInputFechas'/>
                         </div> 
 
                         <div class="col-md-8">
@@ -261,19 +265,18 @@
                             </select>
                         </div>
 
-                        <input type="number" 
-                        class="form-control mt-4 col-md-4" 
+                        <input type="number" class="form-control mt-4 col-md-4" 
                         ng-show="mostrarcmbTipoFiltroUDFNum && cmbTipoFiltroUDFNum != 'Any'"
                         ng-model="txtValorFiltroUDFNum1" 
                         placeholder="Enter value">
 
-                        <div class="col-md-2 mt-4" ng-if="mostrarcmbTipoFiltroUDFNum && cmbTipoFiltroUDFNum == 'Between'">
+                        <div class="col-md-2 mt-4" 
+                        ng-show="mostrarcmbTipoFiltroUDFNum && cmbTipoFiltroUDFNum == 'Between'">
                             <span >AND</span>
                         </div>
 
-                        <input type="number" 
-                        class="form-control mt-4 col-md-4" 
-                        ng-show="mostrarcmbTipoFiltroUDFNum && cmbTipoFiltroUDFNum != 'Any'"
+                        <input type="number" class="form-control mt-4 col-md-4" 
+                        ng-show="mostrarcmbTipoFiltroUDFNum && cmbTipoFiltroUDFNum == 'Between'"
                         ng-model="txtValorFiltroUDFNum2" 
                         placeholder="Enter value">
 
@@ -282,26 +285,49 @@
                         ng-model="txtValorFiltroUDFText"
                         placeholder="Enter value"
                         >
-
-                        <!--
-                        <div class='col-md-6' ng-if="mostrarcmbTipoFiltroUDFNum && cmbTipoFiltroUDFNum != 'Any'">
-                            <input type="number" class="form-control mt-4" ng-model="txtValorFiltroUDFNum1" placeholder="Enter value">
+                        <!--Filtro para fechas -->
+                        <div class='col-md-4'>
+                            <select ng-model="cmbSelectFechasUDF" class="form-control" 
+                            ng-change='cambioSelectFechasUDF()' 
+                            ng-show='mostrarSelectFechasUDF' id='cmbSelectFechasUDF' required> 
+                                <option value="Any">Any</option>
+                                <option value="Before">Before</option>
+                                <option value="After">After</option>
+                                <option value="Equal">Equal</option>
+                                <option value="Range">Range</option>
+                            </select>
                         </div>
-                        <div class="col-md-2 mt-4" ng-if="mostrarcmbTipoFiltroUDFNum && cmbTipoFiltroUDFNum == 'Between'">
-                            <span >AND</span>
+                        <div class='col-md-8'>
+                                <input type='text' ng-model="inputDatePickerUDF" 
+                                id='inputDatePickerUDF' 
+                                class='datepicker-here form-control'
+                                data-range='false' data-language='en' 
+                                ng-show="mostrarInputFechasUDF && cmbSelectFechasUDF != 'Any'"/>
                         </div>
-                            
-                        <div class='col-md-4 mt-4' ng-if="mostrarcmbTipoFiltroUDFNum && cmbTipoFiltroUDFNum == 'Between'">
-                                <input type="number" class="form-control" ng-model="txtValorFiltroUDFNum2"
-                                 placeholder="Enter value"
-                                >
-                        </div>   
-                        <div class='col-md-12 mt-4' ng-if="mostrarcmbTipoFiltroUDFText">
-                                <input type="text" class="form-control" ng-model="txtValorFiltroUDFText"
-                                 placeholder="Enter value"
-                                >
-                        </div>  
-                        -->                   
+                        
+                        <div class='col-md-12'>
+                                <select ng-model="cmbTipoFiltroUDFIndicator" class="form-control" 
+                                ng-change="cambioFiltroUDF('indicator')" 
+                                ng-show='mostrarcmbTipoFiltroUDFIndicator' id='cmbTipoFiltroUDFIndicator' required> 
+                                    <option value="Any">Any value</option>
+                                    <option value="Equal to">Equal to</option>
+                                    <option value="Different from">Different from</option>
+                                </select>
+                            </div>
+                        <div class="col-md-8 mt-4">
+                            <!--Opciones para UDF INDICADOR -->
+                            <select ng-model="cmbUDFIndicador" class="form-control"
+                            style="font-family: 'FontAwesome', 'Arial';"
+                            ng-style="myStyle"
+                            ng-change="cambiocmbUDFIndicador()"
+                            ng-show="mostrarcmbTipoFiltroUDFIndicator && cmbTipoFiltroUDFIndicator != 'Any'" 
+                            > 
+                                <option value="Red" style="color: red">&#xf005;</option>
+                                <option value="Yellow" style="color: yellow">&#xf071;</option>
+                                <option value="Green" style="color: green">&#xf058;</option>
+                                <option value="Blue" style="color: blue">&#xf057;</option>                                
+                            </select>
+                        </div>                                          
                     </div>     
                     </form>               
                 </div>

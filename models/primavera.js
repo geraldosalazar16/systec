@@ -894,7 +894,7 @@ primavera.getUDFs = function(area,usuario,callback){
            
 }
 
-primavera.getUDFsAllProjects = function(usuario,callback){
+primavera.asyncgetUDFsAllProjects = function(usuario,callback){
     var url = usuario.url_primavera;
     var url_ws = url+'UDFValueService?wsdl';
 
@@ -904,7 +904,55 @@ primavera.getUDFsAllProjects = function(usuario,callback){
                         '<wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">'+usuario.pwd_primavera+'</wsse:Password>'+
                         '</wsse:UsernameToken>'+
                     '</wsse:Security>';
-  
+                    return new Promise((resolve,reject) => {
+                        soap.createClient(url_ws,function(err, client) {
+                            if(err){
+                              reject(err);
+                            }
+                            else{
+                              client.addSoapHeader(token_xml);
+                              var args = {
+                                Field:[
+                                    'CodeValue',
+                                    'ConditionalIndicator',
+                                    'Cost',
+                                    'CreateDate',
+                                    'CreateUser',
+                                    'Description',
+                                    'Double',
+                                    'FinishDate',
+                                    'ForeignObjectId',
+                                    'Indicator',
+                                    'Integer',
+                                    'IsBaseline',
+                                    'IsTemplate',
+                                    'IsUDFTypeCalculated',
+                                    'IsUDFTypeConditional',
+                                    'LastUpdateDate',
+                                    'LastUpdateUser',
+                                    'ProjectObjectId',
+                                    'StartDate', 
+                                    'Text',
+                                    'UDFCodeObjectId', 
+                                    'UDFTypeDataType',
+                                    'UDFTypeObjectId',  
+                                    'UDFTypeSubjectArea', 
+                                    'UDFTypeTitle',               
+                                ],
+                                Filter: "UDFTypeSubjectArea='PROJECT'"
+                              };
+                              client.ReadUDFValues(args,function(err, result,rawResponse, soapHeader, rawRequest) {
+                                  if(err){
+                                      reject(err);
+                                  }
+                                  else{
+                                      resolve(result);
+                                  }
+                              });
+                            }
+                        }); 
+                      }); 
+                      /*
                     soap.createClient(url_ws,function(err, client) {
                         if(err){
                           throw err;
@@ -938,7 +986,8 @@ primavera.getUDFsAllProjects = function(usuario,callback){
                                 'UDFTypeObjectId',  
                                 'UDFTypeSubjectArea', 
                                 'UDFTypeTitle',               
-                            ]
+                            ],
+                            Filter: "UDFTypeSubjectArea='PROJECT'"
                           }; 
                           client.ReadUDFValues(args,function(err, result,rawResponse, soapHeader, rawRequest) {
                               if(err){
@@ -950,7 +999,7 @@ primavera.getUDFsAllProjects = function(usuario,callback){
                           });
                         }
                     }); 
-           
+           */
 }
 
 module.exports = primavera;

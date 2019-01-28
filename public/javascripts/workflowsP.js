@@ -86,6 +86,8 @@ app.controller('workflowP', ['$scope', '$http','$window','notify', function($sco
                                 tipo_columna_primavera: element.TIPO_COLUMNA_PRIMAVERA,
                                 tipo_filtro: element.TIPO_FILTRO,
                                 valor_filtro: element.VALOR1_FILTRO,
+                                valor_filtro2: element.VALOR2_FILTRO,
+                                tipo_dato: element.TIPO_DATO,
                                 logica_filtro: element.LOGICA_FILTRO
                             };
                             enlaces.push(enlace);
