@@ -41,6 +41,10 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
     $scope.Enlaces = Array();
     $scope.Proyectos = Array();
     $scope.columnasP6 = Array();
+    $scope.columnasP6Fijas = Array();
+    $scope.columnasP6Codes = Array();
+    $scope.columnasP6UDFs = Array();
+    $scope.columnasP6Todas = Array();
     $scope.columnasSS = Array();
     $scope.Hojas = Array();
 
@@ -412,7 +416,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                     //Agrego columnas adicionales a las encontradas en la base de datos que son fijas
                     if(columnas[0]){
                         columnas.forEach(columna => {
-                            agregar_columna_p6(columna);
+                            agregar_columna_p6('code',columna);
                         });
                     }
                     resolve('success');
@@ -425,6 +429,42 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 reject(err);
             });
         });
+    }
+    //Funciones UDF
+    function getUDFs(){
+        return new Promise((resolve,reject) => {
+            //Buscar las tablas en la base de datos
+            $http.get('/getUDFs?area=Task').
+            then(function(response){
+                if(response.data == 'error'){
+                    reject(response);
+                }
+                else{
+                    udfs = response.data.UDFType;
+
+                    var columnasUDFs = [];
+                    udfs.forEach(udf => {
+                        columnasUDFs.push({
+                            TIPO: 'udf',
+                            ID: udf.ObjectId,
+                            NOMBRE: udf.Title,
+                            TIPO_WORKFLOW: 'TASK',
+                            TIPO_DATO: udf.DataType
+                        });
+                    });  
+                    //Agrego las columnas de udf
+                    if(columnasUDFs[0]){
+                        columnasUDFs.forEach(columna => {
+                            agregar_columna_p6('udf',columna);
+                        });
+                    } 
+                    resolve(response);
+                }
+            }).
+            catch(function(err){
+                reject(err);
+            });
+        }) 
     }
     function getProyectos(){
         return new Promise((resolve,reject) => {
@@ -529,7 +569,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             .then(values => { 
                 if(values[2].data[0]){
                     values[2].data.forEach(columna => {
-                        agregar_columna_p6(columna);
+                        agregar_columna_p6('fija',columna);
                     });
                 }
                 if(values[1].data.Calendar[0].HoursPerDay)
@@ -555,7 +595,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             .then(values => { 
                 if(values[2].data[0]){
                     values[2].data.forEach(columna => {
-                        agregar_columna_p6(columna);
+                        agregar_columna_p6('fija',columna);
                     });
                 }
                 if(values[1].data.Calendar[0].HoursPerDay)
@@ -654,6 +694,34 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
         else{
             $scope.mostrarSelectFechas = false;
             $scope.mostrarInputFechas = false;
+        }
+        if(tipo_columna == 'udf'){
+            $scope.mostrarFiltroUDF = true;
+        
+            var tipo_dato = $scope.cmbColumnasP6.TIPO_DATO;
+            $scope.tipo_dato = $scope.cmbColumnasP6.TIPO_DATO;
+            if(tipo_dato == 'Cost' || tipo_dato == 'Double' || tipo_dato == 'Integer' || tipo_dato == 'Number'){
+                $scope.mostrarcmbTipoFiltroUDFNum = true;
+                $scope.cmbTipoFiltroUDFNum = 'Any';
+                $scope.mostrarcmbTipoFiltroUDFText = false;
+            } else if(tipo_dato == 'Text'){
+                $scope.mostrarcmbTipoFiltroUDFNum = false;
+                $scope.mostrarcmbTipoFiltroUDFText = true;
+                $scope.cmbTipoFiltroUDFText = 'Any';
+            } else if(tipo_dato == 'Indicator'){
+                $scope.cmbUDFIndicador = 'Any';
+                $scope.mostrarcmbTipoFiltroUDFIndicator = true;
+            } else if(tipo_dato.includes('Date')){
+                $scope.cmbSelectFechasUDF = 'Any';
+                $scope.mostrarSelectFechasUDF = true;
+                $scope.mostrarInputFechasUDF = false;
+            }
+        } else {
+            $scope.mostrarcmbTipoFiltroUDFNum = false;
+            $scope.mostrarcmbTipoFiltroUDFText = false;
+            $scope.mostrarSelectFechasUDF = false;
+            $scope.mostrarInputFechasUDF = false;
+            $scope.mostrarcmbTipoFiltroUDFIndicator = false;
         }
     }
     function obtener_fecha_string (fecha){
@@ -760,15 +828,54 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 $scope.valor_filtro = $("#inputDatePicker").val();
             }
         }
+        else if($scope.mostrarSelectFechasUDF == true){ //Filtro Fechas UDF
+            //hay que verificar si es una fecha o es rango
+            $scope.tipo_dato = $scope.cmbColumnasP6.TIPO_DATO;
+            if($scope.cmbSelectFechasUDF == 'Range'){
+                $scope.valor_filtro = $("#inputDatePickerUDF").val();
+            }
+            else{
+                $scope.valor_filtro = $("#inputDatePickerUDF").val();
+            }
+        }
+        else if($scope.mostrarFiltroUDF == true){
+            //Necesito el tipo de dato del udf
+            $scope.tipo_dato = $scope.cmbColumnasP6.TIPO_DATO;
+            if($scope.mostrarcmbTipoFiltroUDFNum == true){
+                if($scope.cmbTipoFiltroUDFNum == 'Between'){
+                    $scope.valor_filtro = $scope.txtValorFiltroUDFNum1;
+                    $scope.valor_filtro2 = $scope.txtValorFiltroUDFNum2;
+                } else if($scope.cmbTipoFiltroUDFNum == 'Any'){
+                    $scope.valor_filtro = 'Cualquier valor';
+                } else {
+                    $scope.valor_filtro = $scope.txtValorFiltroUDFNum1;
+                }                
+            }
+            if($scope.mostrarcmbTipoFiltroUDFText == true){
+                if($scope.cmbTipoFiltroUDFText == 'Any'){
+                    $scope.valor_filtro = 'Cualquier valor';
+                } else {
+                    $scope.valor_filtro = $scope.txtValorFiltroUDFText;
+                }                                
+            }
+            if($scope.mostrarcmbTipoFiltroUDFIndicator == true){
+                if($scope.cmbTipoFiltroUDFIndicator == 'Any'){
+                    $scope.valor_filtro = 'Cualquier valor';
+                } else {
+                    $scope.valor_filtro = $scope.cmbUDFIndicador;
+                }
+            }
+        }
         else{
             $scope.valor_filtro = 'Cualquier valor';
         }
         //Construir la descripcion del filtro
         var descripcion = '';
-        if($scope.tipo_filtro != 'Any'){
+        if($scope.tipo_filtro != 'Any' && $scope.tipo_filtro != 'Between'){
             descripcion = $scope.tipo_filtro+' '+$scope.valor_filtro+' '+$scope.cmbLogica;
-        }
-        else{
+        } else if ($scope.tipo_filtro == 'Between'){
+            descripcion = $scope.tipo_filtro + ' ' + $scope.valor_filtro + ' AND ' + $scope.valor_filtro2 + ' ' +$scope.cmbLogica;
+        } else {
             descripcion = 'Any value '+$scope.cmbLogica;
         }
         var id;
@@ -787,11 +894,12 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             id_ss: $scope.cmbColumnasSS.id,
             NOMBRE_SS: $scope.cmbColumnasSS.title,
             tipo_filtro: $scope.tipo_filtro,
-            valor_filtro: $scope.valor_filtro,
+            valor_filtro: $scope.valor_filtro,valor_filtro2: $scope.valor_filtro2,
             logica_filtro: $scope.cmbLogica,
             descripcion: descripcion,
             id_proyecto_primavera : $scope.wf_actual['ID_PROYECTO_PRIMAVERA'],
-            id_hoja_smartsheet : $scope.wf_actual['ID_HOJA_SMARTSHEET']
+            id_hoja_smartsheet : $scope.wf_actual['ID_HOJA_SMARTSHEET'],
+            tipo_dato: $scope.tipo_dato
         };
         //Si es edicion lo guardo si es modificacion lo modifico, esto lo se con el id (0 nuevo != 0 modificacion)
         $http.post('/almacenarEnlace',enlace)
@@ -867,6 +975,22 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
         });
     }
     $scope.insertarEnlace = function(){
+        //para insercion se muestra el combo de tipos de columna
+        $scope.mostrarCmbTipoColumna = true;
+        $scope.cmbTipoColumna = 'fija';
+        $scope.columnasP6 = $scope.columnasP6Fijas;
+
+        $scope.cmbTipoFiltroUDFNum = 'Any';
+        $scope.cmbTipoFiltroUDFText = 'Any';
+        $scope.cmbSelectFechasUDF = 'Any';
+        $scope.cmbTipoFiltroUDFIndicator = 'Any';
+        $scope.cmbUDFIndicador = '';
+
+        $scope.txtValorFiltroUDFNum1 = "";
+        $scope.txtValorFiltroUDFNum2 = "";
+        $scope.txtValorFiltroUDFText = "";
+        $scope.inputDatePickerUDF = "";
+
         if(!$scope.proyecto_actual){
            $.alert({
                 title: 'Error!',
@@ -903,6 +1027,15 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             $scope.cmbLogica = 'Inclusive'; //AND por defecto
             $scope.mostrarLogica = false; //Por defecto no aparece
             $scope.accion_enlace = 'Create';
+
+            //UDF
+            $scope.mostrarFiltroUDF = false;
+            $scope.mostrarcmbTipoFiltroUDFNum = false;
+            $scope.mostrarcmbTipoFiltroUDFText = false;
+            $scope.mostrarSelectFechasUDF = false;
+            $scope.mostrarInputFechasUDF = false;
+            $scope.mostrarcmbTipoFiltroUDFIndicator = false;
+
             //Iniciar el datepicker con la fecha de hoy
             var datepicker = $('#inputDatePicker').datepicker().data('datepicker');
             datepicker.selectDate(new Date());
@@ -937,11 +1070,17 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
 
         $scope.bloquear_columna_p6 = true;
         $scope.bloquear_columna_ss = true;
+        //para edición no se muestra el combo de tipos de columna
+        $scope.mostrarCmbTipoColumna = false;
+        $scope.columnasP6 = $scope.columnasP6Todas; //Necesario para que aparezcan los nombres de las columnas
 
         //Buscar la información del enlace en la base de datos
         $http.get('/getEnlaceById',{params: {id_enlace:id_enlace}}).
         then(function(response){
             var id_columna_p6 = response.data[0]['ID_COLUMNA_PRIMAVERA'];
+            $scope.tipo_filtro = response.data[0]['TIPO_FILTRO'];
+            //Solo para UDF
+            var tipo_dato = response.data[0]['TIPO_DATO'];
             for(i=0;i<$scope.columnasP6.length;i++){
                 if($scope.columnasP6[i].ID.toString() == id_columna_p6){
                    $scope.cmbColumnasP6 = $scope.columnasP6[i];
@@ -1036,6 +1175,75 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 $scope.mostrarSelectFechas = false;
                 $scope.mostrarInputFechas = false;
             }
+            if(tipo_columna == 'udf'){
+                //Inicializar todos los campos ocultos
+                $scope.mostrarFiltroUDF = false;
+                $scope.mostrarcmbTipoFiltroUDFNum = false;
+                $scope.mostrarcmbTipoFiltroUDFText = false;
+                $scope.mostrarcmbTipoFiltroUDFText = false;
+                $scope.mostrarcmbTipoFiltroUDFIndicator = false;
+                $scope.mostrarSelectFechasUDF = false;
+                $scope.mostrarInputFechasUDF = false;
+
+                $scope.tipo_dato = response.data[0]['TIPO_DATO'];
+                var valor1;
+                    if(response.data[0]['VALOR1_FILTRO'] == 'Cualquier valor'){
+                        valor1 = "";
+                    } else {
+                        valor1 = response.data[0]['VALOR1_FILTRO'];
+                    }
+                if(tipo_dato == 'Cost' || tipo_dato == 'Double' || tipo_dato == 'Integer' || tipo_dato == 'Number'){
+                    $scope.mostrarFiltroUDF = true;
+                    $scope.mostrarcmbTipoFiltroUDFNum = true;
+                    $scope.mostrarcmbTipoFiltroUDFText = false;
+
+                    $scope.cmbTipoFiltroUDFNum = $scope.tipo_filtro;
+                    $scope.txtValorFiltroUDFNum1 = parseFloat(response.data[0]['VALOR1_FILTRO']);
+                    $scope.txtValorFiltroUDFNum2 = parseFloat(response.data[0]['VALOR2_FILTRO']);
+                } else if (tipo_dato == 'Text'){
+                    $scope.mostrarFiltroUDF = true;
+                    $scope.mostrarcmbTipoFiltroUDFNum = false;
+                    $scope.mostrarcmbTipoFiltroUDFText = true;
+
+                    $scope.cmbTipoFiltroUDFText = $scope.tipo_filtro;
+                    
+                    $scope.txtValorFiltroUDFText = valor1;
+                } else if(tipo_dato == 'Indicator'){
+                    $scope.mostrarFiltroUDF = true;
+                    $scope.mostrarcmbTipoFiltroUDFIndicator = true;
+                    $scope.cmbTipoFiltroUDFIndicator = $scope.tipo_filtro;
+                    $scope.cmbUDFIndicador = response.data[0]['VALOR1_FILTRO'];
+                    switch ($scope.cmbUDFIndicador) {
+                        case 'Red':
+                            $scope.myStyle = {'color':'red'};
+                            break;
+                        case 'Yellow':
+                            $scope.myStyle = {'color':'yellow'};
+                            break;
+                        case 'Green':
+                            $scope.myStyle = {'color':'green'};
+                            break;
+                        case 'Blue':
+                            $scope.myStyle = {'color':'blue'};
+                            break;
+                        default:
+                            break;
+                    }
+                } else if(tipo_dato.includes('Date')){
+                    $scope.mostrarFiltroUDF = true;
+                    $scope.mostrarSelectFechasUDF = true;
+                    $scope.cmbSelectFechasUDF = $scope.tipo_filtro;
+                    $scope.mostrarInputFechasUDF = true;
+                    $scope.inputDatePickerUDF = response.data[0]['VALOR1_FILTRO'];
+                }
+            } else {
+                //UDF
+                $scope.mostrarFiltroUDF = false;
+                $scope.mostrarcmbTipoFiltroUDFNum = false;
+                $scope.cmbTipoFiltroUDFText = false;
+                $scope.mostrarSelectFechasUDF = false;
+                $scope.mostrarInputFechasUDF = false;
+            }
             $scope.accion_enlace = 'Save';
             $scope.id_enlace_actual = id_enlace;
 
@@ -1103,6 +1311,9 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             //Solo cargar el proyecto que le corresponde al wf
             var result = await getProyectoById(id_proyecto_primavera,true);
 
+            //Cargar todos los UDFs
+            await getUDFs();                      
+
             $scope.$apply(function(){
                 $scope.Proyectos = Array();
                 $scope.Proyectos[0] = result.data.Project[0];
@@ -1135,19 +1346,72 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             $scope.Proyectos = $scope.Proyectos.data.Project;
             $scope.Proyectos = ordenar_alfabeticamente($scope.Proyectos,'Name');
             await getHojas();
+            //Cargar todos los UDFs
+            await getUDFs(); 
         }
         $scope.loading.close();
     }
-    function agregar_columna_p6(columna){
-        var consecutivo = $scope.columnasP6.length+1;
-        var mapeo = {
-            ID:columna['ID'],
-            NOMBRE:columna['NOMBRE'],
-            TIPO:columna['TIPO'],
-            TIPO_WORKFLOW:columna['TIPO_WORKFLOW'],
-            ID_INTERFACE: consecutivo
+    function agregar_columna_p6(tipo_columna,columna){
+        var consecutivo = $scope.columnasP6Todas.length+1;
+        var col;
+        if(tipo_columna == 'udf'){
+            var col = {
+                ID:columna['ID'],
+                NOMBRE:columna['NOMBRE'],
+                TIPO:columna['TIPO'],
+                TIPO_WORKFLOW:columna['TIPO_WORKFLOW'],
+                ID_INTERFACE: consecutivo,
+                TIPO_DATO: columna['TIPO_DATO']
+            }
+        } else {
+            col = {
+                ID:columna['ID'],
+                NOMBRE:columna['NOMBRE'],
+                TIPO:columna['TIPO'],
+                TIPO_WORKFLOW:columna['TIPO_WORKFLOW'],
+                ID_INTERFACE: consecutivo
+            }
+        }        
+        $scope.columnasP6Todas.push(col);
+
+        switch (tipo_columna) {
+            case 'fija':
+                //var consecutivo = $scope.columnasP6Fijas.length+1;
+                var mapeo = {
+                    ID:columna['ID'],
+                    NOMBRE:columna['NOMBRE'],
+                    TIPO:columna['TIPO'],
+                    TIPO_WORKFLOW:columna['TIPO_WORKFLOW'],
+                    ID_INTERFACE: consecutivo
+                }
+                $scope.columnasP6Fijas.push(mapeo);
+                break;
+            case 'code':
+                //var consecutivo = $scope.columnasP6Codes.length+1;
+                var mapeo = {
+                    ID:columna['ID'],
+                    NOMBRE:columna['NOMBRE'],
+                    TIPO:columna['TIPO'],
+                    TIPO_WORKFLOW:columna['TIPO_WORKFLOW'],
+                    ID_INTERFACE: consecutivo
+                }
+                $scope.columnasP6Codes.push(mapeo);
+                break;
+            case 'udf':
+                //var consecutivo = $scope.columnasP6UDFs.length+1;
+                var mapeo = {
+                    ID:columna['ID'],
+                    NOMBRE:columna['NOMBRE'],
+                    TIPO:columna['TIPO'],
+                    TIPO_WORKFLOW:columna['TIPO_WORKFLOW'],
+                    ID_INTERFACE: consecutivo,
+                    TIPO_DATO: columna['TIPO_DATO']
+                }
+                $scope.columnasP6UDFs.push(mapeo);
+                break;
+            default:
+                break;
         }
-        $scope.columnasP6.push(mapeo);
     }
     function ordenar_alfabeticamente(list,field){
         return list.sort(function (a, b) {
@@ -1161,5 +1425,89 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             return 0;
           });
     } 
+    $scope.cambioTipoColumna = function(){
+        switch ($scope.cmbTipoColumna) {
+            case 'fija':
+                $scope.columnasP6 = $scope.columnasP6Fijas;     
+                break;
+            case 'code':
+                $scope.columnasP6 = $scope.columnasP6Codes;
+                break;
+            case 'udf':
+                $scope.columnasP6 = $scope.columnasP6UDFs;
+                break;
+            default:
+                break;
+        }
+    }
+    $scope.cambioSelectFechasUDF = function(){
+        var datepicker = $('#inputDatePickerUDF').datepicker().data('datepicker');
+        
+        if($scope.cmbSelectFechasUDF == 'Any'){
+            $scope.mostrarInputFechasUDF = false;
+        }
+        else{
+            $scope.mostrarInputFechasUDF = true;
+        }
+
+        $scope.tipo_filtro =$scope.cmbSelectFechasUDF;
+        if($scope.cmbSelectFechasUDF == 'Range'){
+            datepicker.update({
+                range: true,
+                multipleDatesSeparator: " - "
+            });
+            var hoy = new Date();
+            var manana=new Date(hoy.getTime() + 24*60*60*1000);
+            hoy = obtener_fecha_string(hoy);
+            manana = obtener_fecha_string(manana);
+            $("#inputDatePicker").val(hoy + '-' + manana); 
+            //$scope.inputDatePicker = hoy + '-' + manana;
+        }
+        else{
+            datepicker.update({
+                range: false
+            });
+            var hoy = new Date();
+            hoy = obtener_fecha_string(hoy);
+            $("#inputDatePickerUDF").val(hoy); 
+        }
+    }
+    $scope.cambioFiltroUDF = function(emisor){
+        if(emisor == 'num'){
+            $scope.tipo_filtro = $scope.cmbTipoFiltroUDFNum;
+            if($scope.tipo_filtro == 'Any'){
+                $scope.txtValorFiltroUDFNum1 = '';
+                $scope.txtValorFiltroUDFNum2 = '';
+            }
+        } else if(emisor == 'text'){
+            $scope.tipo_filtro = $scope.cmbTipoFiltroUDFText;
+            if($scope.tipo_filtro == 'Any'){
+                $scope.txtValorFiltroUDFText = '';
+            }
+        } else if(emisor == 'indicator'){
+            $scope.tipo_filtro = $scope.cmbTipoFiltroUDFIndicator;
+            if($scope.tipo_filtro == 'Any'){
+                $scope.cmbUDFIndicador = '';
+            }
+        }
+    }
+    $scope.cambiocmbUDFIndicador = function(){
+        switch ($scope.cmbUDFIndicador) {
+            case 'Red':
+                $scope.myStyle = {'color':'red'};
+                break;
+            case 'Yellow':
+                $scope.myStyle = {'color':'yellow'};
+                break;
+            case 'Green':
+                $scope.myStyle = {'color':'green'};
+                break;
+            case 'Blue':
+                $scope.myStyle = {'color':'blue'};
+                break;
+            default:
+                break;
+        }
+    }
     carga_inicial();
 }]);

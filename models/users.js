@@ -426,6 +426,19 @@ userModel.almacenarWorkFlowP = function(info,callback){
 userModel.guardarEnlace = function(info,callback){
     //id,id_workflow,nombre_p6,id_ss,id_p6,tipo_columna_p6,tipo_filtro,valor_filtro,logica_filtro,NOMBRE_SS,descripcion,
     if(con){
+        //Parámetros opcionales
+        var tipo_dato;
+        if(!info['tipo_dato']){
+            tipo_dato = "";
+        } else {
+            tipo_dato = info['tipo_dato'];
+        }
+        var valor_filtro2;
+        if(!info['valor_filtro2']){
+            valor_filtro2 = "";
+        } else {
+            valor_filtro2 = info['valor_filtro2'];
+        }
         if(info['id'] == 0){
             var sql = "INSERT INTO workflows_hojas_columnas"+
             "(ID_WORKFLOW,"+
@@ -439,6 +452,8 @@ userModel.guardarEnlace = function(info,callback){
             "NOMBRE_COLUMNA_SMARTSHEET,"+
             "DESCRIPCION,"+
             "ID_PROYECTO_PRIMAVERA,"+
+            "VALOR2_FILTRO,"+
+            "TIPO_DATO,"+
             "ID_HOJA_SMARTSHEET"+
             ") VALUES ("+
             +info['id_workflow']+",'"
@@ -452,6 +467,8 @@ userModel.guardarEnlace = function(info,callback){
             +info['NOMBRE_SS']+"','"
             +info['descripcion']+"',"
             +info['id_proyecto_primavera']+",'"
+            +valor_filtro2+"','"
+            +tipo_dato+"','"
             +info['id_hoja_smartsheet']
             +"');";
             con.query(sql, function (err, result) {
@@ -472,8 +489,10 @@ userModel.guardarEnlace = function(info,callback){
             ",TIPO_COLUMNA_PRIMAVERA='"+info['tipo_columna_p6']+
             "',TIPO_FILTRO='"+info['tipo_filtro']+
             "',VALOR1_FILTRO='"+info['valor_filtro']+
+            "',VALOR2_FILTRO='"+valor_filtro2+
             "',LOGICA_FILTRO='"+info['logica_filtro']+
             "',NOMBRE_COLUMNA_SMARTSHEET='"+info['NOMBRE_SS']+
+            "',TIPO_DATO='"+tipo_dato+
             "',DESCRIPCION='"+info['descripcion']+
             "',ID_PROYECTO_PRIMAVERA="+info['id_proyecto_primavera']+
             ",ID_HOJA_SMARTSHEET='"+info['id_hoja_smartsheet']+

@@ -427,48 +427,7 @@ router.post('/', function(req, res, next) {
             .catch((error) => reject(error));
         });
     }
-    /*
-    function getWBS(id_proyecto_primavera,id_usuario){
-        return new Promise((resolve,reject) => {
-            primavera.asyncgetWBS(id_proyecto_primavera,id_usuario)
-            .then((result) => resolve(result))
-            .catch((error) => {
-                lugar_error = 'getWBS';
-                reject(error)
-            })
-        });
-    }
-    function getActividades(id_proyecto_primavera,id_usuario){
-        return new Promise((resolve,reject) => {
-            primavera.asyncgetActividades(id_proyecto_primavera,id_usuario)
-            .then((result) => resolve(result))
-            .catch((error) => {
-                lugar_error = 'getActividades';
-                reject(error)
-            })
-        });
-    }
-    function getProjects(id_usuario){
-        return new Promise((resolve,reject) => {
-            primavera.asyncgetProyectos(id_usuario)
-            .then((result) => resolve(result))
-            .catch((error) => {
-                lugar_error = 'getProjects';
-                reject(error)
-            })
-        });
-    }
-    function getRelacionesActividadCodigo(id_proyecto_primavera,id_usuario){
-        return new Promise((resolve,reject) => {
-            primavera.asyncgetRelacionesActividadCodigo(id_proyecto_primavera,id_usuario)
-            .then((result) => resolve(result))
-            .catch((error) => {
-                lugar_error = 'getRelacionesActividadCodigo';
-                reject(error)
-            })
-        });
-    }
-    */
+    
     function actualizarWF(id_wf){
         return new Promise((resolve,reject) => {
             userModel.getWorkflowByIDP(id_wf,function(error,result){

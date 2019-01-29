@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
-var primavera = require('../models/primavera.js')
+var primavera = require('../models/primavera.js');
+var moment = require('moment');
 
 router.post('/', function(req, res, next) {
     var io = req.app.io;
@@ -53,6 +54,7 @@ router.post('/', function(req, res, next) {
         */
         for(var i = 0;i<actividades.length;i++){
             var id_actividad = actividades[i].ObjectId;
+            //var id_proyecto = actividades[i].ProjectId;
             //Recorro todas las columnas, en este caso los enlaces
             var cells = Array();
             if(enlaces.length == 0){
@@ -78,15 +80,6 @@ router.post('/', function(req, res, next) {
                     var codigo_obtenido = codigos.find(function(element,index,array){
                         return (element.ActivityObjectId == id_actividad && element.ActivityCodeTypeObjectId == id_activity_code_type)
                     });
-                    /*
-                    nombre_columna = codigo_obtenido.ActivityCodeTypeName;
-                    if(typeof(codigo_obtenido.ActivityCodeValue) == 'object'){
-                        valor_columna_p6 = '0';
-                    }
-                    else{
-                        valor_columna_p6 = codigo_obtenido.ActivityCodeValue;
-                    }
-                    */
                    if(codigo_obtenido){
                         nombre_columna = codigo_obtenido.ActivityCodeTypeName;
                         if(typeof(codigo_obtenido.ActivityCodeValue) == 'object'){
@@ -98,15 +91,14 @@ router.post('/', function(req, res, next) {
                     }
                     else
                         valor_columna_p6 = 'Not assigned';
-                }
-                else{
+                } else if(enlaces[j]['tipo_columna_primavera'] == 'FIJA') {
                     nombre_columna_p6 = enlaces[j]['columna_primavera'];
                     //Debo verificar que el valor de la actividad sea un primitivo
                     //Esto no se cumple para las fechas ya que vienen como objeto
                     if(typeof(actividades[i][nombre_columna_p6]) == 'object'){
                         if(nombre_columna_p6.includes('Date') || nombre_columna_p6.includes('date')){
-                            var fecha = actividades[i][nombre_columna_p6]
-                            valor_columna_p6 = fecha.toISOString();
+                            var fecha = moment(actividades[i][nombre_columna_p6]);
+                            valor_columna_p6 = fecha.format('YYYY-MM-DDTHH:MM:SS');
                         }
                         else{
                             valor_columna_p6 = '0';
@@ -130,6 +122,65 @@ router.post('/', function(req, res, next) {
                             valor_columna_p6 = actividades[i][nombre_columna_p6];
                         }
                     }
+                } else if(enlaces[j]['tipo_columna_primavera'] == 'udf'){
+                    id_udf_type = enlaces[j]['id_columna_primavera'];
+                    var tipo_dato = enlaces[j]['tipo_dato'];
+                    var udf_obtenido = udfs.find(function(element,index,array){
+                        return (element.ProjectObjectId == id_proyecto_primavera && element.UDFTypeObjectId == id_udf_type && element.ForeignObjectId == id_actividad)
+                    });
+                   if(udf_obtenido){
+                        nombre_columna = udf_obtenido.UDFTypeTitle;
+                        if(udf_obtenido.UDFTypeDataType == "Cost"){
+                            if(typeof(udf_obtenido.Cost) == 'object'){
+                                valor_columna_p6 = '0';
+                            }
+                            else{
+                                valor_columna_p6 = udf_obtenido.Cost;
+                            }
+                        } else if(udf_obtenido.UDFTypeDataType == "Double"){
+                            if(typeof(udf_obtenido.Double) == 'object'){
+                                valor_columna_p6 = '0';
+                            }
+                            else{
+                                valor_columna_p6 = udf_obtenido.Double;
+                            }
+                        } else if(udf_obtenido.UDFTypeDataType == "Indicator"){
+                            if(typeof(udf_obtenido.Indicator) == 'object'){
+                                valor_columna_p6 = '0';
+                            }
+                            else{
+                                valor_columna_p6 = udf_obtenido.Indicator;
+                            }
+                        } else if(udf_obtenido.UDFTypeDataType == "Integer"){
+                            if(typeof(udf_obtenido.Integer) == 'object'){
+                                valor_columna_p6 = '0';
+                            }
+                            else{
+                                valor_columna_p6 = udf_obtenido.Integer;
+                            }
+                        } else if(udf_obtenido.UDFTypeDataType == "Finish Date"){
+                            var fecha = moment(udf_obtenido.FinishDate);
+                            valor_columna_p6 = fecha.format('YYYY-MM-DDTHH:MM:SS');
+                        } else if(udf_obtenido.UDFTypeDataType == "Start Date"){
+                           var fecha = moment(udf_obtenido.StartDate);
+                           valor_columna_p6 = fecha.format('YYYY-MM-DDTHH:MM:SS');
+                        } else if(udf_obtenido.UDFTypeDataType == "Text"){
+                            if(typeof(udf_obtenido.Text) == 'object'){
+                                valor_columna_p6 = '';
+                            }
+                            else{
+                                valor_columna_p6 = udf_obtenido.Text;
+                            }
+                        }                     
+                    } else {
+                        if(tipo_dato.includes('Date')){
+                            valor_columna_p6 = '0';
+                        } else if(tipo_dato == 'Text' || tipo_dato == 'Indicator'){
+                            valor_columna_p6 = '';
+                        } else {
+                            valor_columna_p6 = '0';
+                        }
+                    }                        
                 }
                 var cell = {
                     columnId: id_columna_ss,
@@ -224,6 +275,60 @@ router.post('/', function(req, res, next) {
 
                             if(fecha_celda_aux >= fecha1_filtro && fecha_celda_aux <= fecha2_filtro){
                                 resultado = 1;
+                            }
+                        } else if(enlace.tipo_filtro == 'Bigger than'){
+                            var valor_filtro = enlace.valor_filtro;
+                            var valor_celda = cell['value'];
+                            if(parseFloat(valor_filtro) < parseFloat(valor_celda)){
+                                resultado = 1;
+                            } else {
+                                resultado = 0;
+                            }
+                        } else if(enlace.tipo_filtro == 'Smaller than'){
+                            var valor_filtro = enlace.valor_filtro;
+                            var valor_celda = cell['value'];
+                            if(parseFloat(valor_filtro) > parseFloat(valor_celda)){
+                                resultado = 1;
+                            } else {
+                                resultado = 0;
+                            }
+                        } else if(enlace.tipo_filtro == 'Equal to'){
+                            var valor_filtro = enlace.valor_filtro;
+                            var valor_celda = cell['value'];
+                            if(enlace.tipo_dato == 'Cost' || enlace.tipo_dato == 'Number' || enlace.tipo_dato == 'Double' || enlace.tipo_dato == 'Integer'){
+                                valor_filtro = parseFloat(valor_filtro);
+                                valor_celda = parseFloat(valor_celda);
+                            }                            
+                            if(valor_filtro == valor_celda){
+                                resultado = 1;
+                            } else {
+                                resultado = 0;
+                            }
+                        } else if(enlace.tipo_filtro == 'Different from'){
+                            var valor_filtro = enlace.valor_filtro;
+                            var valor_celda = cell['value'];
+                            if(enlace.tipo_dato == 'Cost' || enlace.tipo_dato == 'Number' || enlace.tipo_dato == 'Double' || enlace.tipo_dato == 'Integer'){
+                                valor_filtro = parseFloat(valor_filtro);
+                                valor_celda = parseFloat(valor_celda);
+                            }
+                            if(valor_filtro != valor_celda){
+                                resultado = 1;
+                            } else {
+                                resultado = 0;
+                            }
+                        } else if(enlace.tipo_filtro == 'Between'){                            
+                            var valor_filtro = enlace.valor_filtro;
+                            var valor_filtro2 = enlace.valor_filtro2;
+                            var valor_celda = cell['value'];
+                            if(enlace.tipo_dato == 'Cost' || enlace.tipo_dato == 'Number' || enlace.tipo_dato == 'Double' || enlace.tipo_dato == 'Integer'){
+                                valor_filtro = parseFloat(valor_filtro);
+                                valor_filtro2 = parseFloat(valor_filtro2);
+                                valor_celda = parseFloat(valor_celda);
+                            }
+                            if(valor_filtro < valor_celda && valor_celda < valor_filtro2){
+                                resultado = 1;
+                            } else {
+                                resultado = 0;
                             }
                         }
                         else{
@@ -380,7 +485,9 @@ router.post('/', function(req, res, next) {
         codigos = await getRelacionesActividadCodigo(id_proyecto_primavera,id_usuario);
         if(codigos.ActivityCodeAssignment)
             codigos = codigos.ActivityCodeAssignment;
-
+        udfs = await primavera.asyncgetUDFsActivities(req.session.usuario);
+        if(udfs.UDFValue)
+            udfs = udfs.UDFValue;
         io.emit('progreso',60);
         io.emit('mensaje','Loading sheet...');
         var sheetInfo = await leerHoja(id_hoja);
@@ -422,7 +529,6 @@ router.post('/', function(req, res, next) {
             for (let index = 0; index < paquetes.length; index++) {
                 io.emit('mensaje',(index+1)*200+' rows deleted');
                 var result = await eliminar(id_hoja,paquetes[index]);
-                //console.log(res);
             }
             //asyncForEach(paquetes,eliminar);
         }

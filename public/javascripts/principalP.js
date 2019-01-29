@@ -1220,6 +1220,8 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 $scope.mostrarFiltroUDF = false;
                 $scope.mostrarcmbTipoFiltroUDFNum = false;
                 $scope.cmbTipoFiltroUDFText = false;
+                $scope.mostrarSelectFechasUDF = false;
+                $scope.mostrarInputFechasUDF = false;
             }
             $scope.accion_enlace = 'Save';
             $scope.id_enlace_actual = id_enlace;

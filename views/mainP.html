@@ -174,7 +174,7 @@
                     </div> 
                     <div class='row'>
                         <div class='col-md-6'>
-                            <label class="control-label">Primavera Column Type<span class="required">*</span></label>
+                            <label class="control-label">Primavera Column Type<span >*</span></label>
                             <select ng-model="cmbTipoColumna" class="form-control" 
                                 ng-show='mostrarCmbTipoColumna'
                                 ng-change="cambioTipoColumna()"> 
@@ -220,7 +220,7 @@
                         <div class='col-md-4'>
                                 <select ng-model="cmbSelectFechas" class="form-control" 
                                 ng-change='cambioSelectFechas()' 
-                                ng-show='mostrarSelectFechas' id='cmbSelectFechas' required> 
+                                ng-show='mostrarSelectFechas' id='cmbSelectFechas'> 
                                     <option value="Any">Any</option>
                                     <option value="Before">Before</option>
                                     <option value="After">After</option>
@@ -246,7 +246,7 @@
                         <div class='col-md-12'>
                                 <select ng-model="cmbTipoFiltroUDFNum" class="form-control"
                                 ng-change="cambioFiltroUDF('num')" 
-                                ng-show='mostrarcmbTipoFiltroUDFNum' id='cmbTipoFiltroUDFNum' required> 
+                                ng-show='mostrarcmbTipoFiltroUDFNum' id='cmbTipoFiltroUDFNum'> 
                                     <option value="Any">Any value</option>
                                     <option value="Bigger than">Bigger than</option>
                                     <option value="Smaller than">Smaller than</option>
@@ -258,7 +258,7 @@
                         <div class='col-md-12'>
                             <select ng-model="cmbTipoFiltroUDFText" class="form-control" 
                             ng-change="cambioFiltroUDF('text')" 
-                            ng-show='mostrarcmbTipoFiltroUDFText' id='cmbTipoFiltroUDFText' required> 
+                            ng-show='mostrarcmbTipoFiltroUDFText' id='cmbTipoFiltroUDFText'> 
                                 <option value="Any">Any value</option>
                                 <option value="Equal to">Equal to</option>
                                 <option value="Different from">Different from</option>
@@ -289,7 +289,7 @@
                         <div class='col-md-4'>
                             <select ng-model="cmbSelectFechasUDF" class="form-control" 
                             ng-change='cambioSelectFechasUDF()' 
-                            ng-show='mostrarSelectFechasUDF' id='cmbSelectFechasUDF' required> 
+                            ng-show='mostrarSelectFechasUDF' id='cmbSelectFechasUDF'> 
                                 <option value="Any">Any</option>
                                 <option value="Before">Before</option>
                                 <option value="After">After</option>
@@ -308,7 +308,7 @@
                         <div class='col-md-12'>
                                 <select ng-model="cmbTipoFiltroUDFIndicator" class="form-control" 
                                 ng-change="cambioFiltroUDF('indicator')" 
-                                ng-show='mostrarcmbTipoFiltroUDFIndicator' id='cmbTipoFiltroUDFIndicator' required> 
+                                ng-show='mostrarcmbTipoFiltroUDFIndicator' id='cmbTipoFiltroUDFIndicator'> 
                                     <option value="Any">Any value</option>
                                     <option value="Equal to">Equal to</option>
                                     <option value="Different from">Different from</option>
@@ -322,10 +322,10 @@
                             ng-change="cambiocmbUDFIndicador()"
                             ng-show="mostrarcmbTipoFiltroUDFIndicator && cmbTipoFiltroUDFIndicator != 'Any'" 
                             > 
-                                <option value="Red" style="color: red">&#xf005;</option>
+                                <option value="Red" style="color: red">&#xf057;</option>
                                 <option value="Yellow" style="color: yellow">&#xf071;</option>
                                 <option value="Green" style="color: green">&#xf058;</option>
-                                <option value="Blue" style="color: blue">&#xf057;</option>                                
+                                <option value="Blue" style="color: blue">&#xf005;</option>                               
                             </select>
                         </div>                                          
                     </div>     
@@ -333,7 +333,8 @@
                 </div>
                 <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" ng-click="guardarEnlace()" id="btnGuardarEnlace"
+                <button type="button" class="btn btn-primary" ng-disabled="!exampleForm.$valid"
+                ng-click="guardarEnlace()" id="btnGuardarEnlace"
                 >{{accion_enlace}}</button>
                 </div>
             </div>

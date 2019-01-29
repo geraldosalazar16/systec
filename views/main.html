@@ -158,54 +158,7 @@
                     <h4 class="modal-title" id="modalTitulo">Insert new bind</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
-                <div class="modal-body"> 
-                    <!--
-                        <form name="exampleForm">                                
-                        <div class="form-group">
-                            <label for="columnaP6">Select Primavera Column</label>
-                            <select ng-model="formData.columnaP6" ng-disabled="bloquear_columna_p6" 
-                            ng-options="columna.NOMBRE for columna in columnasP6 track by columna.ID"
-                            ng-change='cambioColumnaP6()'
-                            class="select2_single form-control" id="columnaP6" name="columnaP6" required
-                            ng-class="{ error: exampleForm.columnaP6.$error.required && !exampleForm.$pristine}">
-                        </div>
-                        <div class="form-group">
-                            <label for="columnaSS">Select Smartsheet Column</label>
-                            <select ng-model="formData.columnaSS" ng-disabled="bloquear_columna_ss"
-                            ng-options="columna.title for columna in columnasSS track by columna.id"
-                            class="select2_single form-control" id="columnaSS" name="columnaSS" required
-                            ng-class="{ error: exampleForm.columnaSS.$error.required && !exampleForm.$pristine}">
-                        </div>
-                        <div class="form-group">
-                            <label ng-show='mostrarFiltroStatus||mostrarSelectFechas||mostrarFiltroActityCode' >Filter rows by value</label>
-                            <select ng-model="formData.status" id="status" name="status"
-                            ng-change='cambioStatus()'  ng-show='mostrarFiltroStatus' required
-                            ng-class="{ error: exampleForm.status.$error.required && !exampleForm.$pristine}">
-                                <option value="All" >All</option>
-                                <option value="Not Started" >Not Started</option>
-                                <option value="In Progress" >In Progress</option>
-                                <option value="Completed" >Completed</option>
-                            </select>
-                            <select ng-model="formData.fecha" id="fecha" name="fecha"
-                            ng-change='cambioSelectFechas()'  ng-show='mostrarSelectFechas' required
-                            ng-class="{ error: exampleForm.fecha.$error.required && !exampleForm.$pristine}">
-                                <option value="Any">Any</option>
-                                <option value="Before">Before</option>
-                                <option value="After">After</option>
-                                <option value="Equal">Equal</option>
-                                <option value="Range">Range</option>
-                            </select>
-                            <select ng-model="formData.activity_codes" id="activity_codes" name="activity_codes"
-                            ng-change='cambioActivityCode()'  ng-show='mostrarFiltroActityCode' required
-                            ng-class="{ error: exampleForm.status.$error.required && !exampleForm.$pristine}"
-                            ng-options= 'ac as ac.CodeValue for ac in ActivityCodesFiltrados '> 
-                            </select>
-                            <input type='text' ng-model="formData.inputDatePicker" id='inputDatePicker' class='datepicker-here form-control'
-                                data-range='false' data-language='en' ng-show='mostrarInputFechas'/>
-                        </div>
-                        <input type="submit" class="btn btn-success pull-right mt-2" ng-click="submitForm(formData)" ng-disabled="!exampleForm.$valid" value="Save"/>
-                    </form>
-                    -->
+                <div class="modal-body">                     
                     <form name="exampleForm"> 
                     <div class='row'>
                         <div class='col-md-6'>
@@ -214,7 +167,19 @@
                                 <option value="Exclusive" >OR</option> 
                             </select>
                         </div>
-                    </div>                   
+                    </div>  
+                    <div class='row'>
+                        <div class='col-md-6'>
+                            <label class="control-label">Primavera Column Type<span class="required">*</span></label>
+                            <select ng-model="cmbTipoColumna" class="form-control" 
+                                ng-show='mostrarCmbTipoColumna'
+                                ng-change="cambioTipoColumna()"> 
+                                <option value="fija" >General Information</option>
+                                <option value="code" >Project Codes</option> ç
+                                <option value="udf" >User Defined Fields</option> 
+                            </select>
+                        </div>
+                    </div>                 
                     <div class='row' style='margin-top: 15px;'>
                         <div class='col-md-6'>
                             <label class="control-label">Select Primavera Column<span class="required">*</span></label>
@@ -265,6 +230,92 @@
                                 ng-show='mostrarFiltroActityCode'
                                 ng-options= 'ac as ac.CodeValue for ac in ActivityCodesFiltrados '> 
                                 </select>
+
+                            <div class='col-md-12'>
+                                <select ng-model="cmbTipoFiltroUDFNum" class="form-control"
+                                ng-change="cambioFiltroUDF('num')" 
+                                ng-show='mostrarcmbTipoFiltroUDFNum' id='cmbTipoFiltroUDFNum'> 
+                                    <option value="Any">Any value</option>
+                                    <option value="Bigger than">Bigger than</option>
+                                    <option value="Smaller than">Smaller than</option>
+                                    <option value="Equal to">Equal to</option>
+                                    <option value="Different from">Different from</option>
+                                    <option value="Between">Between</option>
+                                </select>                                
+                            </div>
+                            <div class='col-md-12'>
+                                <select ng-model="cmbTipoFiltroUDFText" class="form-control" 
+                                ng-change="cambioFiltroUDF('text')" 
+                                ng-show='mostrarcmbTipoFiltroUDFText' id='cmbTipoFiltroUDFText'> 
+                                    <option value="Any">Any value</option>
+                                    <option value="Equal to">Equal to</option>
+                                    <option value="Different from">Different from</option>
+                                </select>
+                            </div>
+    
+                            <input type="number" class="form-control mt-4 col-md-4" 
+                            ng-show="mostrarcmbTipoFiltroUDFNum && cmbTipoFiltroUDFNum != 'Any'"
+                            ng-model="txtValorFiltroUDFNum1" 
+                            placeholder="Enter value">
+    
+                            <div class="col-md-2 mt-4" 
+                            ng-show="mostrarcmbTipoFiltroUDFNum && cmbTipoFiltroUDFNum == 'Between'">
+                                <span >AND</span>
+                            </div>
+    
+                            <input type="number" class="form-control mt-4 col-md-4" 
+                            ng-show="mostrarcmbTipoFiltroUDFNum && cmbTipoFiltroUDFNum == 'Between'"
+                            ng-model="txtValorFiltroUDFNum2" 
+                            placeholder="Enter value">
+    
+                            <input type="text" class="form-control mt-4 col-md-4"
+                            ng-show="mostrarcmbTipoFiltroUDFText && cmbTipoFiltroUDFText != 'Any'"
+                            ng-model="txtValorFiltroUDFText"
+                            placeholder="Enter value"
+                            >
+                            <!--Filtro para fechas -->
+                            <div class='col-md-4'>
+                                <select ng-model="cmbSelectFechasUDF" class="form-control" 
+                                ng-change='cambioSelectFechasUDF()' 
+                                ng-show='mostrarSelectFechasUDF' id='cmbSelectFechasUDF'> 
+                                    <option value="Any">Any</option>
+                                    <option value="Before">Before</option>
+                                    <option value="After">After</option>
+                                    <option value="Equal">Equal</option>
+                                    <option value="Range">Range</option>
+                                </select>
+                            </div>
+                            <div class='col-md-8'>
+                                    <input type='text' ng-model="inputDatePickerUDF" 
+                                    id='inputDatePickerUDF' 
+                                    class='datepicker-here form-control'
+                                    data-range='false' data-language='en' 
+                                    ng-show="mostrarInputFechasUDF && cmbSelectFechasUDF != 'Any'"/>
+                            </div>
+                            
+                            <div class='col-md-12'>
+                                    <select ng-model="cmbTipoFiltroUDFIndicator" class="form-control" 
+                                    ng-change="cambioFiltroUDF('indicator')" 
+                                    ng-show='mostrarcmbTipoFiltroUDFIndicator' id='cmbTipoFiltroUDFIndicator'> 
+                                        <option value="Any">Any value</option>
+                                        <option value="Equal to">Equal to</option>
+                                        <option value="Different from">Different from</option>
+                                    </select>
+                                </div>
+                            <div class="col-md-8 mt-4">
+                                <!--Opciones para UDF INDICADOR -->
+                                <select ng-model="cmbUDFIndicador" class="form-control"
+                                style="font-family: 'FontAwesome', 'Arial';"
+                                ng-style="myStyle"
+                                ng-change="cambiocmbUDFIndicador()"
+                                ng-show="mostrarcmbTipoFiltroUDFIndicator && cmbTipoFiltroUDFIndicator != 'Any'" 
+                                > 
+                                    <option value="Red" style="color: red">&#xf057;</option>
+                                    <option value="Yellow" style="color: yellow">&#xf071;</option>
+                                    <option value="Green" style="color: green">&#xf058;</option>
+                                    <option value="Blue" style="color: blue">&#xf005;</option>                                
+                                </select>
+                            </div> 
                     </div> 
                     </form>               
                 </div>
