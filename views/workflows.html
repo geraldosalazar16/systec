@@ -45,33 +45,24 @@
                 <a class="dropdown-item" href="./users" ng-if="permisos.administrar_usuarios == 1">Manage users</a>
                 <a class="dropdown-item" href="./workflows" >Project workflows</a>
                 <a class="dropdown-item" href="./workflowsP" >Portafolio workflows</a>
+                <a class="dropdown-item" href="./templates" >Templates</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="./login">Log out</a>
             </div>
         </li>
         
     </nav>
-    <div class="container" id="container">
-        <!--          
-        <div class="row">
-            <ul class="nav justify-content-center">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#">Active</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
-                </li>
-            </ul>
-        </div>
-        -->
+    <div class="container" id="container">       
         <div class="row justify-content-center" style="width: 100%; height: 100%;">
             <div class="card mt-4">
                 <div class="card-body">
-                    <div class="form-group justify-content-start" ng-if="permisos.agregar_wf == 1">
-                        <button class="btn btn-secondary" style="background-color: #6B9CBB" type="button" id="btnAgregarWorkFlow"
-                        ng-click="agregarWorkFlow()">
-                            <i class="fas fa-plus" style="font-family: Arial, 'PT Sans', Verdana, Sans-serif; font-size: 21pt; font-weight: normal;"></i> Add a WorkFlow
+                    <div class="form-group" ng-if="permisos.agregar_wf == 1">
+                        <button type="button" class="btn btn-secondary" data-toggle="dropdown"  style="background-color: #6B9CBB">Add a Workflow</button>
                         </button>
+                        <div class="dropdown-menu">
+                          <a class="dropdown-item" href="#" ng-click="$event.preventDefault();agregarWorkFlow('standard')">Standard Workflow</a>
+                          <a class="dropdown-item" href="#" ng-click="$event.preventDefault();agregarWorkFlow('template')">Using a Template</a>
+                        </div>
                     </div>
                     <div class="row mt-4 justify-content-center">
                         <h3 style="font-family: Arial; color: #585E63; font-weight: bold">WorkFlows</h3>
@@ -133,6 +124,7 @@
             </div>
         </div>
     </div>
+    
     <!--Modal progreso-->
     <div class="modal fade" id="modalProgreso" tabindex="-1" role="dialog" aria-labelledby="modalProgresoTitle" aria-hidden="true" data-backdrop="static">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -151,6 +143,35 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Templates-->
+    <div class="modal fade" id="modalVerTemplates" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1"
+    data-backdrop="static" data-keyboard="true">
+       <div class="modal-dialog" role="document">
+           <div class="modal-content">
+               <div class="modal-header">
+                   <h4 class="modal-title" id="modalTitulo1">Templates</h4>
+                   <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+               </div>
+               <div class="modal-body"> 
+                    <form name="exampleForm">                        
+                        <div class="form-group">
+                            <label for="template">Template</label>
+                            <select ng-model="formData.template" 
+                            ng-options="template.ID as template.NOMBRE for template in Templates" 
+                            class="form-control" id="template" name="template" ng-change='cambioTemplate()' required
+                            ng-class="{ error: exampleForm.template.$error.required && exampleForm.template.$touched && !exampleForm.$pristine}">
+                        </div>
+
+                        <input type="submit" class="btn btn-success pull-right mt-2" 
+                        ng-click="submitForm(formData)" 
+                        ng-disabled="!exampleForm.$valid" value="Use this template"/>
+                    </form>
+               </div>                                  
+           </div>
+       </div>
+   </div>
+
     <script src="https://use.fontawesome.com/fab88ee428.js"></script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

@@ -17,6 +17,7 @@ var loginSmartsheet = require('./routes/loginSmartsheet');
 var main = require('./routes/main');
 var mainP = require('./routes/mainP');
 var workflows = require('./routes/workflows');
+var templates = require('./routes/templates');
 var workflowsP = require('./routes/workflowsP');
 var columnasPrimavera = require('./routes/columnasPrimavera');
 var columnasPrimaveraP = require('./routes/columnasPrimaveraP');
@@ -68,6 +69,12 @@ var getUDFs = require('./routes/getUDFs');
 var credPrimavera = require('./routes/credPrimavera');
 var validarCredenciales = require('./routes/validarCredenciales');
 var setP6 = require('./routes/setP6');
+var listarTemplates = require('./routes/listarTemplates');
+var guardarTemplate = require('./routes/guardarTemplate');
+var eliminarTemplate = require('./routes/eliminarTemplate');
+var getEnlacesTemplate = require('./routes/getEnlacesTemplate');
+var copiarHoja = require('./routes/copiarHoja');
+var crearEnlacesDesdeTemplate = require('./routes/crearEnlacesDesdeTemplate');
 
 var app = express();
 
@@ -118,6 +125,7 @@ app.use('/loginSmartsheet', loginSmartsheet);
 app.use('/main', main);
 app.use('/mainP', mainP);
 app.use('/workflows', workflows);
+app.use('/templates', templates);
 app.use('/workflowsP', workflowsP);
 app.use('/columnasPrimavera', columnasPrimavera);
 app.use('/columnasPrimaveraP', columnasPrimaveraP);
@@ -169,6 +177,12 @@ app.use('/getUDFs',getUDFs);
 app.use('/credPrimavera',credPrimavera);
 app.use('/validarCredenciales',validarCredenciales);
 app.use('/setP6',setP6);
+app.use('/listarTemplates',listarTemplates);
+app.use('/guardarTemplate',guardarTemplate);
+app.use('/eliminarTemplate',eliminarTemplate);
+app.use('/getEnlacesTemplate',getEnlacesTemplate);
+app.use('/copiarHoja',copiarHoja);
+app.use('/crearEnlacesDesdeTemplate',crearEnlacesDesdeTemplate);
 
 
 // catch 404 and forward to error handler

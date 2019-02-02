@@ -28,10 +28,25 @@ app.controller('workflow', ['$scope', '$http','$window','notify', function($scop
         eliminar_wf: sessionStorage.eliminar_wf
     }
     
-    $scope.agregarWorkFlow = function(){
-        sessionStorage.accion = 'insertar';
-        sessionStorage.id_wf = 0;
-        $window.location.href = 'main';
+    $scope.agregarWorkFlow = async function(tipo){
+        if(tipo == 'standard'){
+            sessionStorage.accion = 'insertar';
+            sessionStorage.id_wf = 0;
+            $window.location.href = 'main';
+        } else if(tipo == 'template'){
+            $scope.template_actual = null;
+            if(!$scope.Templates){
+                cargarTemplates();
+            } 
+            if($scope.Templates.length == 0){
+                $.alert({
+                    title: 'Error!',
+                    content: 'No templates found, create some!'
+                });
+            } else {
+                $("#modalVerTemplates").modal("show");
+            }
+        }
     }
     function cargarWorkFlows(){
         loading = $.alert({
@@ -330,5 +345,28 @@ app.controller('workflow', ['$scope', '$http','$window','notify', function($scop
             return 0;
           });
     }  
+    function cargarTemplates(){
+        $http.get('/listarTemplates?tipo=project')
+        .then(function(response) {            
+            if(response){
+                $scope.Templates = response.data;
+            }
+        });        
+    }
+    $scope.cambioTemplate = function(){
+        $scope.Templates.forEach(template => {
+            if(template.ID == $scope.formData.template){
+                $scope.template_actual = template;
+            }
+        });
+    }
+    $scope.submitForm = function(formData){
+        sessionStorage.accion = 'template';
+        sessionStorage.id_template = formData.template;
+        sessionStorage.workflow_template = $scope.template_actual.ID_WORKFLOW;
+        sessionStorage.id_wf = 0;
+        $window.location.href = 'main';
+    }
     cargarWorkFlows();
+    cargarTemplates();
 }]);

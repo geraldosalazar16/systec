@@ -34,6 +34,7 @@
                 <a class="dropdown-item" href="./users" ng-if="permisos.administrar_usuarios == 1">Manage users</a>
                 <a class="dropdown-item" href="./workflows" >Project workflows</a>
                 <a class="dropdown-item" href="./workflowsP" >Portafolio workflows</a>
+                <a class="dropdown-item" href="./templates" >Templates</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="./login">Log out</a>
             </div>
@@ -41,38 +42,17 @@
         
     </nav>
     <div class="container" id="container">
-        <!--          
-        <div class="row">
-            <ul class="nav justify-content-center">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#">Active</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
-                </li>
-            </ul>
-        </div>
-        -->
+        
         <div class="row justify-content-center" style="width: 100%; height: 100%;">
             <div class="card mt-4">
                 <div class="card-body">
-                    <!--
-                        <div class="form-group justify-content-start" ng-if="permisos.agregar_wfP == 1">
-                        <button class="btn btn-secondary" style="background-color: #6B9CBB" type="button" id="btnAgregarWorkFlow"
-                        ng-click="agregarWorkFlow()">
-                            <i class="fas fa-plus" style="font-family: Arial, 'PT Sans', Verdana, Sans-serif; font-size: 21pt; font-weight: normal;"></i> Add a WorkFlow
-                        </button>
-                    </div>
-                    -->
                     <div class="btn-group" ng-if="permisos.agregar_wfP == 1">
-                            <button type="button" class="btn btn-secondary" style="background-color: #6B9CBB">Add a Workflow</button>
-                            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" style="background-color: #6B9CBB">
-                            </button>
+                            <button type="button" class="btn btn-secondary" data-toggle="dropdown" style="background-color: #6B9CBB">Add a Workflow</button>
                             <div class="dropdown-menu">
                               <a class="dropdown-item" href="#" ng-click="$event.preventDefault();agregarWorkFlow('standard')">Standard Workflow</a>
                               <a class="dropdown-item" href="#" ng-click="$event.preventDefault();agregarWorkFlow('template')">Using a Template</a>
                             </div>
-                          </div>
+                    </div>
                     <div class="row mt-4 justify-content-center">
                         <h3 style="font-family: Arial; color: #585E63; font-weight: bold">Portafolio WorkFlows</h3>
                     </div>

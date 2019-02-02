@@ -1055,4 +1055,299 @@ userModel.getPerfiles = function(callback){
         });
     }
 }
+userModel.guardarTemplate = function(usuario,info,callback){
+    if(con){
+        var id_propietario = usuario.id;
+        var fecha_creacion = new Date();
+        //Inserción
+        if(info.id == 0){            
+            var sql = "INSERT INTO templates"+ 
+            "(ID_WORKFLOW,NOMBRE,ID_PROPIETARIO,TIPO,FECHA_CREACION)"+ 
+            "VALUES ("+
+            con.escape(info.workflow)+","+
+            con.escape(info.nombre_template)+","+
+            con.escape(id_propietario)+","+
+            con.escape(info.tipo_template)+","+
+            con.escape(fecha_creacion)+");";
+        } else { // Edición
+            var sql = "UPDATE templates SET NOMBRE = " + con.escape(info.nombre_template) + 
+            " WHERE ID = " + con.escape(info.id);
+        }        
+        con.query(sql, function (err, result) {
+            if (err) {
+                console.log(err);
+                callback(err,null); 
+            }
+            else{
+                //callback(null,result);
+                //Guardar los enlaces del workflow
+                if(info.tipo_template == 'project'){
+                    sql = "INSERT INTO template_enlaces ("+
+                    "ID_WORKFLOW,"+
+                    "ID_TEMPLATE,"+
+                    "ID_PROYECTO_PRIMAVERA,"+
+                    "ID_HOJA_SMARTSHEET,"+
+                    "COLUMNA_PRIMAVERA,"+
+                    "ID_COLUMNA_PRIMAVERA,"+
+                    "TIPO_COLUMNA_PRIMAVERA,"+
+                    "COLUMNA_SMARTSHEET,"+
+                    "NOMBRE_COLUMNA_SMARTSHEET,"+
+                    "TIPO_FILTRO,"+
+                    "VALOR1_FILTRO,"+
+                    "VALOR2_FILTRO,"+
+                    "LOGICA_FILTRO,"+
+                    "DESCRIPCION,"+
+                    "TIPO_DATO) "+
+                    " SELECT "+
+                    "ID_WORKFLOW,"+
+                    result.insertId+","+
+                    "ID_PROYECTO_PRIMAVERA,"+
+                    "ID_HOJA_SMARTSHEET,"+
+                    "COLUMNA_PRIMAVERA,"+
+                    "ID_COLUMNA_PRIMAVERA,"+
+                    "TIPO_COLUMNA_PRIMAVERA,"+
+                    "COLUMNA_SMARTSHEET,"+
+                    "NOMBRE_COLUMNA_SMARTSHEET,"+
+                    "TIPO_FILTRO,"+
+                    "VALOR1_FILTRO,"+
+                    "VALOR2_FILTRO,"+
+                    "LOGICA_FILTRO,"+
+                    "DESCRIPCION,"+
+                    "TIPO_DATO "+
+                    " FROM workflows_hojas_columnas "+
+                    " WHERE ID_WORKFLOW = " + con.escape(info.workflow);
+                } else if(info.tipo_template == 'portafolio'){
+                    var sql = "INSERT INTO template_enlaces ("+
+                    "ID_WORKFLOW,"+
+                    "ID_TEMPLATE,"+
+                    "ID_PROYECTO_PRIMAVERA,"+
+                    "ID_HOJA_SMARTSHEET,"+
+                    "COLUMNA_PRIMAVERA,"+
+                    "ID_COLUMNA_PRIMAVERA,"+
+                    "TIPO_COLUMNA_PRIMAVERA,"+
+                    "COLUMNA_SMARTSHEET,"+
+                    "NOMBRE_COLUMNA_SMARTSHEET,"+
+                    "TIPO_FILTRO,"+
+                    "VALOR1_FILTRO,"+
+                    "VALOR2_FILTRO,"+
+                    "LOGICA_FILTRO,"+
+                    "DESCRIPCION,"+
+                    "TIPO_DATO) "+
+                    " SELECT "+
+                    "ID_WORKFLOW,"+
+                    result.insertId+","+
+                    "ID_PROYECTO_PRIMAVERA,"+
+                    "ID_HOJA_SMARTSHEET,"+
+                    "COLUMNA_PRIMAVERA,"+
+                    "ID_COLUMNA_PRIMAVERA,"+
+                    "TIPO_COLUMNA_PRIMAVERA,"+
+                    "COLUMNA_SMARTSHEET,"+
+                    "NOMBRE_COLUMNA_SMARTSHEET,"+
+                    "TIPO_FILTRO,"+
+                    "VALOR1_FILTRO,"+
+                    "VALOR2_FILTRO,"+
+                    "LOGICA_FILTRO,"+
+                    "DESCRIPCION,"+
+                    "TIPO_DATO "+
+                    " FROM workflows_hojas_columnasp "+
+                    " WHERE ID_WORKFLOW = " + con.escape(info.workflow);
+                }
+                con.query(sql, function (err, result) {
+                    if (err) {
+                        console.log(err);
+                        callback(err,null); 
+                    } else {
+                        callback(null,result);
+                    }
+                });
+            }
+        });
+    }
+}
+userModel.listarTemplates = function(usuario,callback){
+    if(con){
+        var id_propietario = usuario.id;
+        var sql = "SELECT "+ 
+        " T.ID,"+
+        " T.TIPO,"+
+        " T.NOMBRE,"+
+        " T.FECHA_CREACION,"+
+        " T.ID_WORKFLOW,"+
+        " CASE"+ 
+            " WHEN T.TIPO = 'project'"+
+            " THEN W.NOMBRE"+
+            " ELSE WP.NOMBRE"+ 
+        " END AS NOMBRE_WORKFLOW"+
+        " FROM templates T"+
+        " LEFT JOIN workflows W"+ 
+        " ON T.ID_WORKFLOW = W.ID"+
+        " LEFT JOIN workflowsp WP"+
+        " ON T.ID_WORKFLOW = WP.ID WHERE T.ID_PROPIETARIO = " + con.escape(id_propietario) + ";";
+        con.query(sql, function (err, result) {
+            if (err) {
+                console.log(err);
+                callback(err,null); 
+            }
+            else{                
+                callback(null,result);
+            }
+        });
+    }
+
+}
+userModel.eliminarTemplate = function(id_template,callback){
+    if(con){
+        var sql = "DELETE FROM templates WHERE ID = "+con.escape(id_template);
+        con.query(sql, function (err, result) {
+            if (err) {
+                callback(err,null); 
+            }
+            else{
+                //callback(null,result);
+                //Eliminar los enlaces
+                sql = "DELETE FROM template_enlaces WHERE ID_TEMPLATE = " + con.escape(id_template);
+                con.query(sql, function (err, result) {
+                    if (err) {
+                        callback(err,null); 
+                    }
+                    else{
+                        callback(null,result);
+                    }
+                });
+            }
+        });
+    }
+}
+userModel.getEnlacesTemplate = function(id_template,callback){
+    if(con){
+        var sql = "SELECT * FROM template_enlaces WHERE ID_TEMPLATE = "+con.escape(id_template);
+        con.query(sql, function (err, result) {
+            if (err) {
+                callback(err,null); 
+            }
+            else{
+                callback(null,result);
+            }
+        });
+    }
+}
+userModel.listarTemplatesProject = function(usuario,callback){
+    if(con){
+        var id_propietario = usuario.id;
+        var sql = "SELECT "+ 
+        " T.ID,"+
+        " T.TIPO,"+
+        " T.NOMBRE,"+
+        " T.FECHA_CREACION,"+
+        " T.ID_WORKFLOW,"+
+        " CASE"+ 
+            " WHEN T.TIPO = 'project'"+
+            " THEN W.NOMBRE"+
+            " ELSE WP.NOMBRE"+ 
+        " END AS NOMBRE_WORKFLOW"+
+        " FROM templates T"+
+        " LEFT JOIN workflows W"+ 
+        " ON T.ID_WORKFLOW = W.ID"+
+        " LEFT JOIN workflowsp WP"+
+        " ON T.ID_WORKFLOW = WP.ID"+
+        " WHERE T.ID_PROPIETARIO = " + con.escape(id_propietario) +
+        " AND T.TIPO = 'project'" + ";";
+        con.query(sql, function (err, result) {
+            if (err) {
+                console.log(err);
+                callback(err,null); 
+            }
+            else{                
+                callback(null,result);
+            }
+        });
+    }
+
+}
+userModel.listarTemplatesPortafolio = function(usuario,callback){
+    if(con){
+        var id_propietario = usuario.id;
+        var sql = "SELECT "+ 
+        " T.ID,"+
+        " T.TIPO,"+
+        " T.NOMBRE,"+
+        " T.FECHA_CREACION,"+
+        " T.ID_WORKFLOW,"+
+        " CASE"+ 
+            " WHEN T.TIPO = 'project'"+
+            " THEN W.NOMBRE"+
+            " ELSE WP.NOMBRE"+ 
+        " END AS NOMBRE_WORKFLOW"+
+        " FROM templates T"+
+        " LEFT JOIN workflows W"+ 
+        " ON T.ID_WORKFLOW = W.ID"+
+        " LEFT JOIN workflowsp WP"+
+        " ON T.ID_WORKFLOW = WP.ID"+
+        " WHERE T.ID_PROPIETARIO = " + con.escape(id_propietario) +
+        " AND T.TIPO = 'portafolio'" + ";";
+        con.query(sql, function (err, result) {
+            if (err) {
+                console.log(err);
+                callback(err,null); 
+            }
+            else{                
+                callback(null,result);
+            }
+        });
+    }
+
+}
+userModel.crearEnlacesDesdeTemplate = function(info,callback){
+    var id_wf = info['id_wf'];
+    var id_template = info['id_template'];
+    //Obtener todos los enlaces del template
+    if(con){
+        var sql = "SELECT * FROM template_enlaces WHERE ID_TEMPLATE = " + con.escape(id_template);
+        con.query(sql, function (err, result) {
+            if (err) {
+                callback(err,null); 
+            }
+            else{                
+                //callback(null,result);
+                result.forEach(enlace => {
+                    sql = "INSERT INTO workflows_hojas_columnas ("+
+                    "ID_WORKFLOW,"+
+                    "ID_PROYECTO_PRIMAVERA,"+
+                    "ID_HOJA_SMARTSHEET,"+
+                    "COLUMNA_PRIMAVERA,"+
+                    "ID_COLUMNA_PRIMAVERA,"+
+                    "TIPO_COLUMNA_PRIMAVERA,"+
+                    "COLUMNA_SMARTSHEET,"+
+                    "NOMBRE_COLUMNA_SMARTSHEET,"+
+                    "TIPO_FILTRO,"+
+                    "VALOR1_FILTRO,"+
+                    "VALOR2_FILTRO,"+
+                    "LOGICA_FILTRO,"+
+                    "DESCRIPCION,"+
+                    "TIPO_DATO) VALUES (" +
+                    id_wf + "," +
+                    enlace.ID_PROYECTO_PRIMAVERA + "," +
+                    enlace.ID_HOJA_SMARTSHEET + ",'" +
+                    enlace.COLUMNA_PRIMAVERA + "'," +
+                    enlace.ID_COLUMNA_PRIMAVERA + ",'" +
+                    enlace.TIPO_COLUMNA_PRIMAVERA + "','" +
+                    enlace.COLUMNA_SMARTSHEET + "','" +
+                    enlace.NOMBRE_COLUMNA_SMARTSHEET + "','" +
+                    enlace.TIPO_FILTRO + "','" +
+                    enlace.VALOR1_FILTRO + "','" +
+                    enlace.VALOR2_FILTRO + "','" +
+                    enlace.LOGICA_FILTRO + "','" +
+                    enlace.DESCRIPCION + "','" +
+                    enlace.TIPO_DATO + "');";
+                    con.query(sql, function (err, result1) {
+                        if (err) {
+                            callback(err,null); 
+                        }
+                    });
+                });
+                callback(null,result);
+            }
+        });
+    }
+}
 module.exports = userModel;

@@ -1,0 +1,11 @@
+1- Columna tipo_dato enlaces actividades
+3- permisos templates
+insert into perfil_permisos (ID_PERFIL,ID_PERMISO,VALOR) VALUES (1,11,1);
+insert into perfil_permisos (ID_PERFIL,ID_PERMISO,VALOR) VALUES (1,12,1);
+insert into perfil_permisos (ID_PERFIL,ID_PERMISO,VALOR) VALUES (1,13,1);
+insert into perfil_permisos (ID_PERFIL,ID_PERMISO,VALOR) VALUES (2,11,0);
+insert into perfil_permisos (ID_PERFIL,ID_PERMISO,VALOR) VALUES (2,12,0);
+insert into perfil_permisos (ID_PERFIL,ID_PERMISO,VALOR) VALUES (2,13,0);
+insert into perfil_permisos (ID_PERFIL,ID_PERMISO,VALOR) VALUES (3,11,0);
+insert into perfil_permisos (ID_PERFIL,ID_PERMISO,VALOR) VALUES (3,12,0);
+insert into perfil_permisos (ID_PERFIL,ID_PERMISO,VALOR) VALUES (3,13,0);

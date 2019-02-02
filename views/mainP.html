@@ -38,6 +38,7 @@
                 <a class="dropdown-item" href="./users" ng-if="permisos.administrar_usuarios == 1">Manage users</a>
                 <a class="dropdown-item" href="./workflows" >Project workflows</a>
                 <a class="dropdown-item" href="./workflowsP" >Portafolio workflows</a>
+                <a class="dropdown-item" href="./templates" >Templates</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="./login">Log out</a>
             </div>
@@ -67,21 +68,7 @@
                                 class="form-control" ng-model="comentariosWorkflow" >
                             </textarea>
                         </div>
-                    </div>                  
-                    
-                    <!--
-                    <div class="row mt-4">
-                        <div class="col-md-4 text-right">
-                            <label class="control-label">Select Primavera Project</label>
-                        </div>
-                        <div class="col-md-6">
-                            <select ng-model="cmbProyectos" ng-disabled="bloquear_proyectos" ng-options="proyecto.Name for proyecto in Proyectos track by proyecto.ObjectId" 
-                            class="select2_single form-control" id="cmbProyectos" ng-change='cambioProyecto()'> 
-                            </select>
-                        </div> 
-                    </div>
-                    -->
-                    
+                    </div>                   
 
                     <div class="row mt-4">
                         <div class="col-md-4 text-right">
