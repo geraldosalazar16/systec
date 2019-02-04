@@ -75,6 +75,7 @@ var eliminarTemplate = require('./routes/eliminarTemplate');
 var getEnlacesTemplate = require('./routes/getEnlacesTemplate');
 var copiarHoja = require('./routes/copiarHoja');
 var crearEnlacesDesdeTemplate = require('./routes/crearEnlacesDesdeTemplate');
+var crearEnlacesDesdeTemplateP = require('./routes/crearEnlacesDesdeTemplateP');
 
 var app = express();
 
@@ -183,6 +184,7 @@ app.use('/eliminarTemplate',eliminarTemplate);
 app.use('/getEnlacesTemplate',getEnlacesTemplate);
 app.use('/copiarHoja',copiarHoja);
 app.use('/crearEnlacesDesdeTemplate',crearEnlacesDesdeTemplate);
+app.use('/crearEnlacesDesdeTemplateP',crearEnlacesDesdeTemplateP);
 
 
 // catch 404 and forward to error handler

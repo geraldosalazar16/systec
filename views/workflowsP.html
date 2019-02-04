@@ -121,6 +121,35 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Templates-->
+    <div class="modal fade" id="modalVerTemplates" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1"
+    data-backdrop="static" data-keyboard="true">
+       <div class="modal-dialog" role="document">
+           <div class="modal-content">
+               <div class="modal-header">
+                   <h4 class="modal-title" id="modalTitulo1">Templates</h4>
+                   <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+               </div>
+               <div class="modal-body"> 
+                    <form name="exampleForm">                        
+                        <div class="form-group">
+                            <label for="template">Template</label>
+                            <select ng-model="formData.template" 
+                            ng-options="template.ID as template.NOMBRE for template in Templates" 
+                            class="form-control" id="template" name="template" ng-change='cambioTemplate()' required
+                            ng-class="{ error: exampleForm.template.$error.required && exampleForm.template.$touched && !exampleForm.$pristine}">
+                        </div>
+
+                        <input type="submit" class="btn btn-success pull-right mt-2" 
+                        ng-click="submitForm(formData)" 
+                        ng-disabled="!exampleForm.$valid" value="Use this template"/>
+                    </form>
+               </div>                                  
+           </div>
+       </div>
+   </div>
+   
     <script src="https://use.fontawesome.com/fab88ee428.js"></script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

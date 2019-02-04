@@ -3,7 +3,7 @@ var router = express.Router();
 var userModel = require('../models/users.js');
 
 router.post('/',function(req,res){
-    userModel.crearEnlacesDesdeTemplate(req.body)
+    userModel.crearEnlacesDesdeTemplateP(req.body)
     .then(result => res.send(result))
     .catch(err => res.send(error));
 });

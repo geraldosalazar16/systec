@@ -99,6 +99,15 @@ app.controller('credPrimavera', ['$scope', '$http','$window','notify', function(
                         var cargar_smartsheetP = permisos.find(function(element){
                             return element['ID_PERMISO'] == 10;
                         });
+                        var agregar_template = permisos.find(function(element){
+                            return element['ID_PERMISO'] == 11;
+                        });
+                        var editar_template = permisos.find(function(element){
+                            return element['ID_PERMISO'] == 12;
+                        });
+                        var eliminar_template = permisos.find(function(element){
+                            return element['ID_PERMISO'] == 13;
+                        });
                         sessionStorage.administrar_usuarios = administrar_usuarios['VALOR'];
                         sessionStorage.agregar_wf = agregar_wf['VALOR'];
                         sessionStorage.cargar_primavera = cargar_primavera['VALOR'];
@@ -110,6 +119,10 @@ app.controller('credPrimavera', ['$scope', '$http','$window','notify', function(
                         sessionStorage.cargar_smartsheetP = cargar_smartsheetP['VALOR'];
                         sessionStorage.editar_wfP = editar_wfP['VALOR'];
                         sessionStorage.eliminar_wfP = eliminar_wfP['VALOR'];
+
+                        sessionStorage.agregar_template = agregar_template['VALOR'];
+                        sessionStorage.editar_template = editar_template['VALOR'];
+                        sessionStorage.eliminar_template = eliminar_template['VALOR'];
 
                         //$window.location.href = 'credPrimavera';
                     }

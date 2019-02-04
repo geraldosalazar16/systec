@@ -106,10 +106,6 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
         currentTab = currentTab + n;
         // if you have reached the end of the form... :
         if (currentTab >= x.length) {
-            //Aca enviar los datos
-            //Aca insertar el workflow si es nuevo o guardar los cambios si es insercion
-            await $scope.almacenarWorkflow();
-            //$scope.almacenarEnlaces();
             
             if($scope.accion == 'editar'){
                 $.alert({
@@ -128,10 +124,110 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             
             return false;
         }
-        //Si es template agregar los enlaces
+        //validaciones
+        if(!$scope.workflowName){
+            $.alert({
+                title: 'Error!',
+                content: 'Name the workflow!',
+            });
+        }
+        //Aca insertar el workflow si es nuevo
         mostrarLoading('Working!','Saving your data');
+        var response = await $scope.almacenarWorkflow();
+        //Asignar el workflow actual 
+        $scope.id_wf = response.data['ID'];
+        var result = await cargarWorkflow($scope.id_wf);
+        $scope.wf_actual = result.data[0];
+        $scope.workflowName = result.data[0]['NOMBRE'];
+        $scope.comentariosWorkflow = result.data[0]['COMENTARIOS'];
+        //var id_hoja_ss = result.data[0]['ID_HOJA_SMARTSHEET'];                
+        //var id_proyecto_primavera = result.data[0]['ID_PROYECTO_PRIMAVERA'];
+
+        //Si es template agregar los enlaces        
         if($scope.accion == 'template'){
-            await crearEnlacesWorkflow($scope.id_wf,$scope.id_template);
+            //Obtener todos los enlaces del template
+            var template_enlaces = await get_enlaces_template($scope.id_template);
+
+            //Obtener la info del wf
+            var wf = await cargarWorkflow($scope.id_wf);
+            if(wf){
+                wf = wf.data[0];
+            }
+
+            //Obtener las columnas de la hoja de smartsheet
+            var columnasSS = await leerColumnasHojaSS(wf.ID_HOJA_SMARTSHEET);
+            if(columnasSS){
+                columnasSS = columnasSS.data;
+            }
+
+            if(template_enlaces){
+                if(template_enlaces.length > 0){
+                    var errores = [];
+                    var index = 0;
+                    template_enlaces.forEach(enlace => {
+                        //Buscar la columna de smartsheet
+                        var found = columnasSS.find(function(columna) {
+                            return columna.title == enlace.NOMBRE_COLUMNA_SMARTSHEET;
+                        });
+                        //Si no encuentra la columna salvar el error
+                        //De lo contrario guardar el id
+                        if(!found){
+                            errores.push(enlace.NOMBRE_COLUMNA_SMARTSHEET);
+                            template_enlaces.splice(index,1);
+                        } else {
+                            enlace.COLUMNA_SMARTSHEET = found.id;
+                            enlace.ID_WORKFLOW = $scope.id_wf;
+                            enlace.ID_HOJA_SMARTSHEET = wf.ID_HOJA_SMARTSHEET;
+                        }
+                        index++;
+                    });
+                    if(errores.length > 0){
+                        var texto_error = "";
+                        errores.forEach(error => {
+                            texto_error = texto_error + error + ";<br>";
+                        });
+                        $.confirm({
+                            title: 'Some binds cannot be created',
+                            content: texto_error,
+                            buttons: {
+                                confirm: {
+                                    text: 'Continue anyway', 
+                                    action: async function () {                
+                                        await crearEnlacesWorkflow(id_wf,template_enlaces);
+                                        result = await getEnlacesByWf();
+                                        if(result.data[0]){
+                                            result.data.forEach(enlace => {
+                                                $scope.agregarEnlace(enlace);
+                                            });
+                                        }  
+                                        $scope.Enlaces = ordenar_alfabeticamente($scope.Enlaces,'NOMBRE_P6');
+                                        $scope.$apply();
+                                    }
+                                },
+                                cancel: function () {
+                                    
+                                }
+                            }
+                        });
+                    } else {
+                        await crearEnlacesWorkflow($scope.id_wf,template_enlaces);
+                        result = await getEnlacesByWf();
+                        if(result.data[0]){
+                            result.data.forEach(enlace => {
+                                $scope.agregarEnlace(enlace);
+                            });
+                        }  
+                        $scope.Enlaces = ordenar_alfabeticamente($scope.Enlaces,'NOMBRE_P6');
+                        $scope.$apply();
+                    }
+                } else {
+                    $.alert({
+                        title: 'Error!',
+                        content: 'The selected template has no binds!',
+                    });
+                }
+            }
+
         }
         cerrarLoading();
         // Otherwise, display the correct tab:        
@@ -218,7 +314,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
         x[n].className += " active";
       }
     //Fin del control de los tabs
-    
+    /*
     function setDatePicker(){
         $('#inputDatePicker').datepicker({
             language: 'en',
@@ -293,6 +389,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             });
         }
     }
+    */
     function getHojas(){
         return new Promise((resolve,reject) => {
             $http.post('/leer')
@@ -317,6 +414,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             .catch((error) => reject(error))
         });
     }
+    /*
     async function cargarHojas(){
         $scope.Hojas = await getHojas();
         $scope.Hojas = $scope.Hojas.data;
@@ -332,6 +430,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 $scope.hojas_listas = 0;
             }
     }
+    */
     function cargarWorkflow(id_wf){
         return new Promise((resolve,reject) => {
             $http.get('/getWorkflowByID',{params: {id_wf:id_wf}})
@@ -942,52 +1041,40 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             });
         $("#modalInsertarActualizar").modal("hide");
     }
-    $scope.almacenarWorkflow = async function(){
-        //validaciones
-        if(!$scope.workflowName){
-           $.alert({
-                title: 'Error!',
-                content: 'Missing workflow name!',
+    $scope.almacenarWorkflow = function(){
+        return new Promise((resolve,reject) => {
+            //Revisar si es edicion o creacion
+            var id_wf;
+            if($scope.accion == 'insertar'){
+                id_wf = 0;
+            } else if($scope.accion == 'editar'){
+                id_wf = $scope.id_wf;
+            } else if ($scope.accion == 'template'){
+                id_wf = 0;
+            }
+            //PRIMERO TENGO QUE GUARDAR EL WORKFLOW
+            var workflow = {
+                id_wf : id_wf,
+                nombre: $scope.workflowName,
+                id_proyecto_primavera: $scope.proyecto_actual.ObjectId,
+                nombre_proyecto_primavera: $scope.proyecto_actual.Name,
+                id_hoja_smartsheet: $scope.cmbHojas.id,
+                nombre_hoja_ss: $scope.cmbHojas.nombre,
+                comentarios: $scope.comentariosWorkflow,
+                factor_duracion: $scope.factor_duracion
+            };
+            $http.post('/almacenarWorkFlow',workflow).
+            then(function(response){
+                if(response.data == 'error'){
+                    reject(response);
+                }
+                else{
+                    resolve(response)
+                }
+            }).
+            catch(function(err){
+                reject(err);
             });
-            return 0;
-        }
-        //Revisar si es edicion o creacion
-        var id_wf;
-        if($scope.accion == 'insertar'){
-            id_wf = 0;
-        }
-        else{
-            id_wf = $scope.id_wf;
-        }
-        //PRIMERO TENGO QUE GUARDAR EL WORKFLOW
-        var workflow = {
-            id_wf : id_wf,
-            nombre: $scope.workflowName,
-            id_proyecto_primavera: $scope.proyecto_actual.ObjectId,
-            nombre_proyecto_primavera: $scope.proyecto_actual.Name,
-            id_hoja_smartsheet: $scope.cmbHojas.id,
-            nombre_hoja_ss: $scope.cmbHojas.nombre,
-            comentarios: $scope.comentariosWorkflow,
-            factor_duracion: $scope.factor_duracion
-        };
-        $http.post('/almacenarWorkFlow',workflow)
-        .then(async function(response) {
-            if(response){                    
-                //Asignar el workflow actual 
-                $scope.id_wf = response.data['ID'];
-                var result = await cargarWorkflow($scope.id_wf);
-                $scope.wf_actual = result.data[0];
-                $scope.workflowName = result.data[0]['NOMBRE'];
-                $scope.comentariosWorkflow = result.data[0]['COMENTARIOS'];
-                var id_hoja_ss = result.data[0]['ID_HOJA_SMARTSHEET'];                
-                var id_proyecto_primavera = result.data[0]['ID_PROYECTO_PRIMAVERA'];
-            }
-            else{
-               $.alert({
-                    title: 'Error!',
-                    content: 'No data loaded!',
-                });
-            }
         });
     }
     $scope.insertarEnlace = function(){
@@ -1595,10 +1682,10 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             $scope.loading.close();
         }
     }
-    function crearEnlacesWorkflow(id_wf,id_template){
+    function crearEnlacesWorkflow(id_wf,enlaces){
         var datos = {
             id_wf: id_wf,
-            id_template: id_template
+            enlaces: enlaces
         }
         return new Promise((resolve,reject) => {
             $http.post('/crearEnlacesDesdeTemplate',datos)
@@ -1608,5 +1695,26 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             .catch((error) => reject(error))
         });
     }
+    function get_enlaces_template(id_template){
+        return new Promise((resolve,reject) => {
+            $http.get('/getEnlacesTemplate?id_template='+id_template)
+            .then((result) => {
+                resolve(result.data)
+            })
+            .catch((error) => reject(error))
+        });
+    }
+    function leerColumnasHojaSS(id_hoja){
+        var hoja = {
+            id: id_hoja
+        };
+        return new Promise((resolve,reject) => {
+            //Buscar las columnas de la hoja
+            $http.post('/columnasSS',hoja)
+            .then((result) => resolve(result))
+            .catch((error) => reject(error))
+        });
+    }
+    //Entry point
     carga_inicial();
 }]);

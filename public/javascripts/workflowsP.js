@@ -32,8 +32,19 @@ app.controller('workflowP', ['$scope', '$http','$window','notify', function($sco
             sessionStorage.accion = 'insertar';
             sessionStorage.id_wf = 0;
             $window.location.href = 'mainP';
-        } else if (tipo == 'template') {
-
+        } else if(tipo == 'template'){
+            $scope.template_actual = null;
+            if(!$scope.Templates){
+                cargarTemplates();
+            } 
+            if($scope.Templates.length == 0){
+                $.alert({
+                    title: 'Error!',
+                    content: 'No templates found, create some!'
+                });
+            } else {
+                $("#modalVerTemplates").modal("show");
+            }
         }
         
     }
@@ -295,5 +306,30 @@ app.controller('workflowP', ['$scope', '$http','$window','notify', function($sco
             return 0;
           });
     } 
+    function cargarTemplates(){
+        $http.get('/listarTemplates?tipo=portafolio')
+        .then(function(response) {            
+            if(response){
+                $scope.Templates = response.data;
+            }
+        });        
+    }
+    $scope.cambioTemplate = function(){
+        $scope.Templates.forEach(template => {
+            if(template.ID == $scope.formData.template){
+                $scope.template_actual = template;
+            }
+        });
+    }
+    $scope.submitForm = function(formData){
+        sessionStorage.accion = 'template';
+        sessionStorage.id_template = formData.template;
+        sessionStorage.workflow_template = $scope.template_actual.ID_WORKFLOW;
+        sessionStorage.id_wf = 0;
+        $window.location.href = 'mainP';
+    }
+
+    //Entry point
     cargarWorkFlows();
+    cargarTemplates();
 }]);

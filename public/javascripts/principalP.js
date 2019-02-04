@@ -34,6 +34,10 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
 
     $scope.comentariosWorkflow = "";
 
+    //Para cuando se crea a partir de un template
+    $scope.id_template = sessionStorage.id_template;
+    $scope.workflow_template = sessionStorage.workflow_template;
+
     //Mostrar nombre del proyecto   
     //$scope.mostrarNombreProyecto = false;
 
@@ -80,7 +84,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
         // ... and run a function that displays the correct step indicator:
         fixStepIndicator(n);
     }
-    $scope.nextPrev =  function(n) {
+    $scope.nextPrev =  async function(n) {
         // This function will figure out which tab to display
         var x = document.getElementsByClassName("tab");
         // Exit the function if any field in the current tab is invalid:
@@ -118,9 +122,129 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             
             return false;
         }
-        // Otherwise, display the correct tab:
+        //validaciones
+        if(!$scope.workflowName){
+            $.alert({
+                title: 'Error!',
+                content: 'Name the workflow!',
+            });
+        }
         //Aca insertar el workflow si es nuevo
-        $scope.almacenarWorkflow();
+        mostrarLoading('Working!','Saving your data');
+        var response = await $scope.almacenarWorkflow();
+
+        //Asignar el workflow actual 
+        $scope.id_wf = response.data[0]['ID'];
+        var result = await cargarWorkflowPortafolio($scope.id_wf);
+        $scope.wf_actual = result.data[0];
+        $scope.workflowName = result.data[0]['NOMBRE'];
+        $scope.comentariosWorkflow = result.data[0]['COMENTARIOS'];
+        //var id_hoja_ss = result.data[0]['ID_HOJA_SMARTSHEET'];  
+
+        //Si es template agregar los enlaces        
+        if($scope.accion == 'template'){
+            //Obtener todos los enlaces del template
+            var template_enlaces = await get_enlaces_template($scope.id_template);
+
+            //Obtener la info del wf
+            var wf = await cargarWorkflowPortafolio($scope.id_wf);
+            if(wf){
+                wf = wf.data[0];
+            } else {
+                $.alert({
+                    title: 'Error!',
+                    content: 'No workflow selected',
+                });
+                cerrarLoading();
+                return false;
+            }
+
+            //Obtener las columnas de la hoja de smartsheet
+            var columnasSS = await leerColumnasHojaSS(wf.ID_HOJA_SMARTSHEET);
+            if(columnasSS){
+                columnasSS = columnasSS.data;
+            } else {
+                $.alert({
+                    title: 'Error!',
+                    content: 'No Smartsheet columns found',
+                });
+                cerrarLoading();
+                return false;
+            }
+
+            if(template_enlaces){
+                if(template_enlaces.length > 0){
+                    var errores = [];
+                    var index = 0;
+                    template_enlaces.forEach(enlace => {
+                        //Buscar la columna de smartsheet
+                        var found = columnasSS.find(function(columna) {
+                            return columna.title == enlace.NOMBRE_COLUMNA_SMARTSHEET;
+                        });
+                        //Si no encuentra la columna salvar el error
+                        //De lo contrario guardar el id
+                        if(!found){
+                            errores.push(enlace.NOMBRE_COLUMNA_SMARTSHEET);
+                            template_enlaces.splice(index,1);
+                        } else {
+                            enlace.COLUMNA_SMARTSHEET = found.id;
+                            enlace.ID_WORKFLOW = $scope.id_wf;
+                            enlace.ID_HOJA_SMARTSHEET = wf.ID_HOJA_SMARTSHEET;
+                        }
+                        index++;
+                    });
+                    if(errores.length > 0){
+                        var texto_error = "";
+                        errores.forEach(error => {
+                            texto_error = texto_error + error + ";<br>";
+                        });
+                        $.confirm({
+                            title: 'Some binds cannot be created',
+                            content: texto_error,
+                            buttons: {
+                                confirm: {
+                                    text: 'Continue anyway', 
+                                    action: async function () {                
+                                        await crearEnlacesWorkflow(id_wf,template_enlaces);
+                                        result = await getEnlacesByWfPortafolio();
+                                        if(result.data[0]){
+                                            result.data.forEach(enlace => {
+                                                $scope.agregarEnlace(enlace);
+                                            });
+                                        }  
+                                        $scope.Enlaces = ordenar_alfabeticamente($scope.Enlaces,'NOMBRE_P6');
+                                        $scope.$apply();
+                                    }
+                                },
+                                cancel: function () {
+                                    
+                                }
+                            }
+                        });
+                    } else {
+                        await crearEnlacesWorkflow($scope.id_wf,template_enlaces);
+                        result = await getEnlacesByWfPortafolio();
+                        result = await getEnlacesByWfPortafolio();
+                        if(result.data[0]){
+                            result.data.forEach(enlace => {
+                                $scope.agregarEnlace(enlace);
+                            });
+                        }  
+                        $scope.Enlaces = ordenar_alfabeticamente($scope.Enlaces,'NOMBRE_P6');
+                        $scope.$apply();
+                    }
+                } else {
+                    $.alert({
+                        title: 'Error!',
+                        content: 'The selected template has no binds!',
+                    });
+                    cerrarLoading();
+                    return false;
+                }
+            }
+
+        }
+        cerrarLoading();
         
         showTab(currentTab);
     }
@@ -308,9 +432,9 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             }
     }
     */
-    function cargarWorkflowPortafolio(){
+    function cargarWorkflowPortafolio(id_wf){
         return new Promise((resolve,reject) => {
-            $http.get('/getWorkflowByIDP',{params: {id_wf:$scope.id_wf}})
+            $http.get('/getWorkflowByIDP',{params: {id_wf:id_wf}})
             .then((result) => resolve(result))
             .catch((error) => reject(error))
         }).
@@ -919,6 +1043,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
         $("#modalInsertarActualizar").modal("hide");
     }
     $scope.almacenarWorkflow = async function(){
+        /*
         //validaciones
         if(!$scope.workflowName){
            $.alert({
@@ -948,7 +1073,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
             if(response){                    
                 //Asignar el workflow actual 
                 $scope.id_wf = response.data[0]['ID'];
-                var result = await cargarWorkflowPortafolio();
+                var result = await cargarWorkflowPortafolio($scope.id_wf);
                 $scope.wf_actual = result.data[0];
                 $scope.workflowName = result.data[0]['NOMBRE'];
                 $scope.comentariosWorkflow = result.data[0]['COMENTARIOS'];
@@ -960,6 +1085,38 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                     content: 'No data loaded!',
                 });
             }
+        });
+        */
+        return new Promise((resolve,reject) => {
+            //Revisar si es edicion o creacion
+            var id_wf;
+            if($scope.accion == 'insertar'){
+                id_wf = 0;
+            } else if($scope.accion == 'editar'){
+                id_wf = $scope.id_wf;
+            } else if ($scope.accion == 'template'){
+                id_wf = 0;
+            }
+            //PRIMERO TENGO QUE GUARDAR EL WORKFLOW
+            var workflow = {
+                id_wf : id_wf,
+                nombre: $scope.workflowName,
+                id_hoja_smartsheet: $scope.cmbHojas.id,
+                nombre_hoja_ss: $scope.cmbHojas.nombre,
+                comentarios: $scope.comentariosWorkflow
+            };
+            $http.post('/almacenarWorkFlowP',workflow).
+            then(function(response){
+                if(response.data == 'error'){
+                    reject(response);
+                }
+                else{
+                    resolve(response)
+                }
+            }).
+            catch(function(err){
+                reject(err);
+            });
         });
     }
     $scope.insertarEnlace = function(){
@@ -1039,13 +1196,15 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
     $scope.editarEnlace = function(id_enlace){
         //Mostrar loading
         $scope.loading = "";
+        mostrarLoading('Working!','Loading bind information!');
+        /*
         $scope.loading = $.dialog({
             icon: 'fa fa-spinner fa-spin',
             title: 'Working!',
             content: 'Loading bind information!',
             closeIcon: false
         });
-
+        */
         $scope.bloquear_columna_p6 = true;
         $scope.bloquear_columna_ss = true;
         //para edición no se muestra el combo de tipos de columna
@@ -1228,7 +1387,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
 
             $scope.columnasP6 = ordenar_alfabeticamente($scope.columnasP6,'NOMBRE');
             $scope.columnasSS = ordenar_alfabeticamente($scope.columnasSS,'title');
-            $scope.closeLoading();            
+            cerrarLoading();            
             $("#modalInsertarActualizar").modal("show");
             
         });
@@ -1333,204 +1492,315 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
     }
     onSelect2();
     async function carga_inicial(){
-            
-        if($scope.accion == 'editar'){
-            $scope.loading = $.dialog({
-                icon: 'fa fa-spinner fa-spin',
-                title: 'Working!',
-                content: 'Sit back, we are loading the sheet, proyect and binds of this workflow!',
-                closeIcon: false
-            });
-            //Bloquear hojas y proyectos cuando es edicion
-            $scope.bloquear_hojas = true;
-            $scope.bloquear_proyectos = true;
-
-            var result = await cargarWorkflowPortafolio();
-            $scope.wf_actual = result.data[0];
-            $scope.workflowName = result.data[0]['NOMBRE'];
-            $scope.comentariosWorkflow = result.data[0]['COMENTARIOS'];
-            //Con el id de la hoja busco en la lista de hojas
-            //Y ese es el valor que debe tener la lista de hojas
-            var id_hoja_ss = result.data[0]['ID_HOJA_SMARTSHEET'];
-            //Solo debo cargar la hoja del workflow por disposición de Antonio
-            await getHojaSS(id_hoja_ss,true);
-            $scope.cambioHojas();
- 
-            result = await getEnlacesByWfPortafolio();
-            if(result.data[0]){
-                result.data.forEach(enlace => {
-                    $scope.agregarEnlace(enlace);
+        try{
+            if($scope.accion == 'editar'){
+                mostrarLoading('Working!','Sit back, we are loading the sheet, proyect and binds of this workflow!');
+                /*
+                $scope.loading = $.dialog({
+                    icon: 'fa fa-spinner fa-spin',
+                    title: 'Working!',
+                    content: 'Sit back, we are loading the sheet, proyect and binds of this workflow!',
+                    closeIcon: false
                 });
-            }   
-            $scope.Enlaces = ordenar_alfabeticamente($scope.Enlaces,'NOMBRE_P6');
-            var cols = await cargarColumnasP6();
-            $scope.project_codes = await getListaPosiblesValoresProjectCodes();
-            $scope.project_codes = $scope.project_codes.data.ProjectCode;
-            var relProyectosCodigos = await getRelacionProyectosCodigos();
-            relProyectosCodigos = relProyectosCodigos.data.ProjectCodeAssignment;
-            
-            //Arreglo pàra almacenar las posibles columnas
-            var columnas = Array();
-            //Cargo el primer valor para que tenga algo
-            columnas[0] = {
-                TIPO: 'project_code_type',
-                ID: relProyectosCodigos[0]['ProjectCodeTypeObjectId'],
-                NOMBRE: relProyectosCodigos[0]['ProjectCodeTypeName'],
-                TIPO_WORKFLOW: 'PORTAFOLIO'
-            };
-            //Recorro todas las relaciones
-            relProyectosCodigos.forEach(relacion => {
-                //variable para indicar si se encontro el tipo de codigo entre las relaciones
-                var found = 0;
-                columnas.forEach(columna => {
-                    //para cada uno de los valores salvados verifico si es igual al tipo de codigo actual
-                    //Si no aparece debo agregar ese tipo de codigo a las posibles columnas
-                    //Si aparece es porque ya lo agregue antes y sigo buscando
-                    if(columna.ID == relacion.ProjectCodeTypeObjectId){
-                        found = 1;
-                        return;
+                */
+                //Bloquear hojas y proyectos cuando es edicion
+                $scope.bloquear_hojas = true;
+                $scope.bloquear_proyectos = true;
+    
+                var result = await cargarWorkflowPortafolio($scope.id_wf);
+                $scope.wf_actual = result.data[0];
+                $scope.workflowName = result.data[0]['NOMBRE'];
+                $scope.comentariosWorkflow = result.data[0]['COMENTARIOS'];
+                //Con el id de la hoja busco en la lista de hojas
+                //Y ese es el valor que debe tener la lista de hojas
+                var id_hoja_ss = result.data[0]['ID_HOJA_SMARTSHEET'];
+                //Solo debo cargar la hoja del workflow por disposición de Antonio
+                await getHojaSS(id_hoja_ss,true);
+                $scope.cambioHojas();
+     
+                result = await getEnlacesByWfPortafolio();
+                if(result.data[0]){
+                    result.data.forEach(enlace => {
+                        $scope.agregarEnlace(enlace);
+                    });
+                }   
+                $scope.Enlaces = ordenar_alfabeticamente($scope.Enlaces,'NOMBRE_P6');
+                var cols = await cargarColumnasP6();
+                $scope.project_codes = await getListaPosiblesValoresProjectCodes();
+                $scope.project_codes = $scope.project_codes.data.ProjectCode;
+                var relProyectosCodigos = await getRelacionProyectosCodigos();
+                relProyectosCodigos = relProyectosCodigos.data.ProjectCodeAssignment;
+                
+                //Arreglo pàra almacenar las posibles columnas
+                var columnas = Array();
+                //Cargo el primer valor para que tenga algo
+                columnas[0] = {
+                    TIPO: 'project_code_type',
+                    ID: relProyectosCodigos[0]['ProjectCodeTypeObjectId'],
+                    NOMBRE: relProyectosCodigos[0]['ProjectCodeTypeName'],
+                    TIPO_WORKFLOW: 'PORTAFOLIO'
+                };
+                //Recorro todas las relaciones
+                relProyectosCodigos.forEach(relacion => {
+                    //variable para indicar si se encontro el tipo de codigo entre las relaciones
+                    var found = 0;
+                    columnas.forEach(columna => {
+                        //para cada uno de los valores salvados verifico si es igual al tipo de codigo actual
+                        //Si no aparece debo agregar ese tipo de codigo a las posibles columnas
+                        //Si aparece es porque ya lo agregue antes y sigo buscando
+                        if(columna.ID == relacion.ProjectCodeTypeObjectId){
+                            found = 1;
+                            return;
+                        }
+                    });
+                    if(found == 0){
+                        columnas.push({
+                            TIPO: 'project_code_type',
+                            ID: relacion.ProjectCodeTypeObjectId,
+                            NOMBRE: relacion.ProjectCodeTypeName,
+                            TIPO_WORKFLOW: 'PORTAFOLIO'
+                        });
+                    }
+                    else{
+                        found = 0;
                     }
                 });
-                if(found == 0){
-                    columnas.push({
-                        TIPO: 'project_code_type',
-                        ID: relacion.ProjectCodeTypeObjectId,
-                        NOMBRE: relacion.ProjectCodeTypeName,
-                        TIPO_WORKFLOW: 'PORTAFOLIO'
+                //Cargar todos los UDFs
+                var udfs = await getUDFs();
+                udfs = udfs.data.UDFType;
+    
+                var columnasUDFs = [];
+                udfs.forEach(udf => {
+                    columnasUDFs.push({
+                        TIPO: 'udf',
+                        ID: udf.ObjectId,
+                        NOMBRE: udf.Title,
+                        TIPO_WORKFLOW: 'PORTAFOLIO',
+                        TIPO_DATO: udf.DataType
+                    });
+                });
+                //Agrego columnas adicionales (codes) a las encontradas en la base de datos que son fijas
+                if(columnas[0]){
+                    columnas.forEach(columna => {
+                        agregar_columna_p6('code',columna);
                     });
                 }
-                else{
-                    found = 0;
-                }
-            });
-            //Cargar todos los UDFs
-            var udfs = await getUDFs();
-            udfs = udfs.data.UDFType;
-
-            var columnasUDFs = [];
-            udfs.forEach(udf => {
-                columnasUDFs.push({
-                    TIPO: 'udf',
-                    ID: udf.ObjectId,
-                    NOMBRE: udf.Title,
-                    TIPO_WORKFLOW: 'PORTAFOLIO',
-                    TIPO_DATO: udf.DataType
+                //Agrego las columnas fijas
+                if(cols.data[0]){
+                    cols.data.forEach(columna => {
+                        agregar_columna_p6('fija',columna);
+                    });
+                }    
+                //Agrego las columnas de udf
+                if(columnasUDFs[0]){
+                    columnasUDFs.forEach(columna => {
+                        agregar_columna_p6('udf',columna);
+                    });
+                }    
+            } else if($scope.accion == 'insertar') {
+                mostrarLoading('Working!','Sit back, we are loading your sheets and proyects!');
+                /*
+                $scope.loading = $.dialog({
+                    icon: 'fa fa-spinner fa-spin',
+                    title: 'Working!',
+                    content: 'Sit back, we are loading your sheets and proyects!',
+                    closeIcon: false
                 });
-            });
-            //Agrego columnas adicionales (codes) a las encontradas en la base de datos que son fijas
-            if(columnas[0]){
-                columnas.forEach(columna => {
-                    agregar_columna_p6('code',columna);
-                });
-            }
-            //Agrego las columnas fijas
-            if(cols.data[0]){
-                cols.data.forEach(columna => {
-                    agregar_columna_p6('fija',columna);
-                });
-            }    
-            //Agrego las columnas de udf
-            if(columnasUDFs[0]){
-                columnasUDFs.forEach(columna => {
-                    agregar_columna_p6('udf',columna);
-                });
-            }    
-        }
-        else{
-            $scope.loading = $.dialog({
-                icon: 'fa fa-spinner fa-spin',
-                title: 'Working!',
-                content: 'Sit back, we are loading your sheets and proyects!',
-                closeIcon: false
-            });
-            //Desbloquear las listas de proyectos y hojas
-            $scope.bloquear_hojas = false;
-            $scope.bloquear_proyectos = false;
-
-            //Cargar Portafolio y hojas
-            $scope.Proyectos = Array();
-            $scope.Proyectos = await getProyectos();
-            $scope.Proyectos = $scope.Proyectos.data.Project;
-            await getHojas();
-            var cols = await cargarColumnasP6();
-            $scope.project_codes = await getListaPosiblesValoresProjectCodes();
-            $scope.project_codes = $scope.project_codes.data.ProjectCode;
-            var relProyectosCodigos = await getRelacionProyectosCodigos();
-            relProyectosCodigos = relProyectosCodigos.data.ProjectCodeAssignment;
-            //Arreglo pàra almacenar las posibles columnas
-            var columnas = Array();
-            //Cargo el primer valor para que tenga algo
-            columnas[0] = {
-                TIPO: 'project_code_type',
-                ID: relProyectosCodigos[0]['ProjectCodeTypeObjectId'],
-                NOMBRE: relProyectosCodigos[0]['ProjectCodeTypeName'],
-                TIPO_WORKFLOW: 'PORTAFOLIO'
-            };
-            //Recorro todas las relaciones
-            relProyectosCodigos.forEach(relacion => {
-                //variable para indicar si se encontro el tipo de codigo entre las relaciones
-                var found = 0;
-                columnas.forEach(columna => {
-                    //para cada uno de los valores salvados verifico si es igual al tipo de codigo actual
-                    //Si no aparece debo agregar ese tipo de codigo a las posibles columnas
-                    //Si aparece es porque ya lo agregue antes y sigo buscando
-                    if(columna.ID == relacion.ProjectCodeTypeObjectId){
-                        found = 1;
-                        return;
+                */
+                //Desbloquear las listas de proyectos y hojas
+                $scope.bloquear_hojas = false;
+                $scope.bloquear_proyectos = false;
+    
+                //Cargar Portafolio y hojas
+                $scope.Proyectos = Array();
+                $scope.Proyectos = await getProyectos();
+                $scope.Proyectos = $scope.Proyectos.data.Project;
+                await getHojas();
+                var cols = await cargarColumnasP6();
+                $scope.project_codes = await getListaPosiblesValoresProjectCodes();
+                $scope.project_codes = $scope.project_codes.data.ProjectCode;
+                var relProyectosCodigos = await getRelacionProyectosCodigos();
+                relProyectosCodigos = relProyectosCodigos.data.ProjectCodeAssignment;
+                //Arreglo pàra almacenar las posibles columnas
+                var columnas = Array();
+                //Cargo el primer valor para que tenga algo
+                columnas[0] = {
+                    TIPO: 'project_code_type',
+                    ID: relProyectosCodigos[0]['ProjectCodeTypeObjectId'],
+                    NOMBRE: relProyectosCodigos[0]['ProjectCodeTypeName'],
+                    TIPO_WORKFLOW: 'PORTAFOLIO'
+                };
+                //Recorro todas las relaciones
+                relProyectosCodigos.forEach(relacion => {
+                    //variable para indicar si se encontro el tipo de codigo entre las relaciones
+                    var found = 0;
+                    columnas.forEach(columna => {
+                        //para cada uno de los valores salvados verifico si es igual al tipo de codigo actual
+                        //Si no aparece debo agregar ese tipo de codigo a las posibles columnas
+                        //Si aparece es porque ya lo agregue antes y sigo buscando
+                        if(columna.ID == relacion.ProjectCodeTypeObjectId){
+                            found = 1;
+                            return;
+                        }
+                    });
+                    if(found == 0){
+                        columnas.push({
+                            TIPO: 'project_code_type',
+                            ID: relacion.ProjectCodeTypeObjectId,
+                            NOMBRE: relacion.ProjectCodeTypeName,
+                            TIPO_WORKFLOW: 'PORTAFOLIO'
+                        });
+                    }
+                    else{
+                        found = 0;
                     }
                 });
-                if(found == 0){
-                    columnas.push({
-                        TIPO: 'project_code_type',
-                        ID: relacion.ProjectCodeTypeObjectId,
-                        NOMBRE: relacion.ProjectCodeTypeName,
-                        TIPO_WORKFLOW: 'PORTAFOLIO'
+                //Cargar todos los UDFs
+                var udfs = await getUDFs();
+                udfs = udfs.data.UDFType;
+    
+                var columnasUDFs = [];
+                udfs.forEach(udf => {
+                    columnasUDFs.push({
+                        TIPO: 'udf',
+                        ID: udf.ObjectId,
+                        NOMBRE: udf.Title,
+                        TIPO_WORKFLOW: 'PORTAFOLIO',
+                        TIPO_DATO: udf.DataType
+                    });
+                });
+                //Agrego columnas adicionales (codes) a las encontradas en la base de datos que son fijas
+                if(columnas[0]){
+                    columnas.forEach(columna => {
+                        agregar_columna_p6('code',columna);
                     });
                 }
-                else{
-                    found = 0;
+                //Agrego columnas adicionales a las encontradas en la base de datos que son fijas
+                if(columnas[0]){
+                    columnas.forEach(columna => {
+                        agregar_columna_p6('code',columna);
+                    });
                 }
-            });
-            //Cargar todos los UDFs
-            var udfs = await getUDFs();
-            udfs = udfs.data.UDFType;
+                //Agrego las columnas fijas
+                if(cols.data[0]){
+                    cols.data.forEach(columna => {
+                        agregar_columna_p6('fija',columna);
+                    });
+                }
+                //Agrego las columnas de udf
+                if(columnasUDFs[0]){
+                    columnasUDFs.forEach(columna => {
+                        agregar_columna_p6('udf',columna);
+                    });
+                } 
+            } else if($scope.accion == 'template'){
+                mostrarLoading('Working!','Sit back, we are loading your sheets and projects!');
+                
+                //Select de hojas bloqueado ya que se va a crear
+                $scope.bloquear_hojas = true;
+                $scope.bloquear_proyectos = false;
+    
+                //Cargar Portafolio y hojas
+                $scope.Proyectos = Array();
+                $scope.Proyectos = await getProyectos();
+                $scope.Proyectos = $scope.Proyectos.data.Project;
+                $scope.Proyectos = ordenar_alfabeticamente($scope.Proyectos,'Name');
 
-            var columnasUDFs = [];
-            udfs.forEach(udf => {
-                columnasUDFs.push({
-                    TIPO: 'udf',
-                    ID: udf.ObjectId,
-                    NOMBRE: udf.Title,
-                    TIPO_WORKFLOW: 'PORTAFOLIO',
-                    TIPO_DATO: udf.DataType
+                //Copiar hoja del template
+                //Obtener datos del workflow
+                var workflow = await cargarWorkflowPortafolio($scope.workflow_template);
+                if(workflow){
+                    workflow = workflow.data[0];
+                }
+                var nueva_hoja = await copiarHojaSS(workflow.ID_HOJA_SMARTSHEET,"Copy off " + workflow.NOMBRE_HOJA_SS);
+                if(nueva_hoja){
+                    nueva_hoja = nueva_hoja.data;
+                }
+                await getHojaSS(nueva_hoja.id,true);
+                $scope.cambioHojas();
+
+                var cols = await cargarColumnasP6();
+                $scope.project_codes = await getListaPosiblesValoresProjectCodes();
+                $scope.project_codes = $scope.project_codes.data.ProjectCode;
+                var relProyectosCodigos = await getRelacionProyectosCodigos();
+                relProyectosCodigos = relProyectosCodigos.data.ProjectCodeAssignment;
+                //Arreglo pàra almacenar las posibles columnas
+                var columnas = Array();
+                //Cargo el primer valor para que tenga algo
+                columnas[0] = {
+                    TIPO: 'project_code_type',
+                    ID: relProyectosCodigos[0]['ProjectCodeTypeObjectId'],
+                    NOMBRE: relProyectosCodigos[0]['ProjectCodeTypeName'],
+                    TIPO_WORKFLOW: 'PORTAFOLIO'
+                };
+                //Recorro todas las relaciones
+                relProyectosCodigos.forEach(relacion => {
+                    //variable para indicar si se encontro el tipo de codigo entre las relaciones
+                    var found = 0;
+                    columnas.forEach(columna => {
+                        //para cada uno de los valores salvados verifico si es igual al tipo de codigo actual
+                        //Si no aparece debo agregar ese tipo de codigo a las posibles columnas
+                        //Si aparece es porque ya lo agregue antes y sigo buscando
+                        if(columna.ID == relacion.ProjectCodeTypeObjectId){
+                            found = 1;
+                            return;
+                        }
+                    });
+                    if(found == 0){
+                        columnas.push({
+                            TIPO: 'project_code_type',
+                            ID: relacion.ProjectCodeTypeObjectId,
+                            NOMBRE: relacion.ProjectCodeTypeName,
+                            TIPO_WORKFLOW: 'PORTAFOLIO'
+                        });
+                    }
+                    else{
+                        found = 0;
+                    }
                 });
-            });
-            //Agrego columnas adicionales (codes) a las encontradas en la base de datos que son fijas
-            if(columnas[0]){
-                columnas.forEach(columna => {
-                    agregar_columna_p6('code',columna);
+                //Cargar todos los UDFs
+                var udfs = await getUDFs();
+                udfs = udfs.data.UDFType;
+    
+                var columnasUDFs = [];
+                udfs.forEach(udf => {
+                    columnasUDFs.push({
+                        TIPO: 'udf',
+                        ID: udf.ObjectId,
+                        NOMBRE: udf.Title,
+                        TIPO_WORKFLOW: 'PORTAFOLIO',
+                        TIPO_DATO: udf.DataType
+                    });
                 });
+                //Agrego columnas adicionales (codes) a las encontradas en la base de datos que son fijas
+                if(columnas[0]){
+                    columnas.forEach(columna => {
+                        agregar_columna_p6('code',columna);
+                    });
+                }
+                //Agrego columnas adicionales a las encontradas en la base de datos que son fijas
+                if(columnas[0]){
+                    columnas.forEach(columna => {
+                        agregar_columna_p6('code',columna);
+                    });
+                }
+                //Agrego las columnas fijas
+                if(cols.data[0]){
+                    cols.data.forEach(columna => {
+                        agregar_columna_p6('fija',columna);
+                    });
+                }
+                //Agrego las columnas de udf
+                if(columnasUDFs[0]){
+                    columnasUDFs.forEach(columna => {
+                        agregar_columna_p6('udf',columna);
+                    });
+                } 
             }
-            //Agrego columnas adicionales a las encontradas en la base de datos que son fijas
-            if(columnas[0]){
-                columnas.forEach(columna => {
-                    agregar_columna_p6('code',columna);
-                });
-            }
-            //Agrego las columnas fijas
-            if(cols.data[0]){
-                cols.data.forEach(columna => {
-                    agregar_columna_p6('fija',columna);
-                });
-            }
-            //Agrego las columnas de udf
-            if(columnasUDFs[0]){
-                columnasUDFs.forEach(columna => {
-                    agregar_columna_p6('udf',columna);
-                });
-            } 
-        }
-        $scope.closeLoading();
+        } catch (err){
+
+        }    
+        cerrarLoading();
     }
     function agregar_columna_p6(tipo_columna,columna){
         var consecutivo = $scope.columnasP6Todas.length+1;
@@ -1621,10 +1891,68 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 break;
         }
     }
-    $scope.closeLoading = function(){
+    function cerrarLoading(){
         if($scope.loading){
             $scope.loading.close();
         }
     }
+    function mostrarLoading(title,message){
+        $scope.loading = null;
+        $scope.loading = $.dialog({
+            icon: 'fa fa-spinner fa-spin',
+            title: title,
+            content: message,
+            closeIcon: false
+        });
+    }
+    function copiarHojaSS(id_hoja,nuevo_nombre){
+        var datos = {
+            id_hoja: id_hoja,
+            nombre: nuevo_nombre
+        }
+        return new Promise((resolve,reject) => {
+            $http.post('/copiarHoja',datos)
+            .then((result) => resolve(result))
+            .catch((error) => reject(error))
+        }).
+        catch((err) => {
+            console.log(err);
+        });
+    }
+    function get_enlaces_template(id_template){
+        return new Promise((resolve,reject) => {
+            $http.get('/getEnlacesTemplate?id_template='+id_template)
+            .then((result) => {
+                resolve(result.data)
+            })
+            .catch((error) => reject(error))
+        });
+    }
+    function leerColumnasHojaSS(id_hoja){
+        var hoja = {
+            id: id_hoja
+        };
+        return new Promise((resolve,reject) => {
+            //Buscar las columnas de la hoja
+            $http.post('/columnasSS',hoja)
+            .then((result) => resolve(result))
+            .catch((error) => reject(error))
+        });
+    }
+    function crearEnlacesWorkflow(id_wf,enlaces){
+        var datos = {
+            id_wf: id_wf,
+            enlaces: enlaces
+        }
+        return new Promise((resolve,reject) => {
+            $http.post('/crearEnlacesDesdeTemplateP',datos)
+            .then((result) => {
+                resolve(result)
+            })
+            .catch((error) => reject(error))
+        });
+    }
+
+    //Entry pint
     carga_inicial();
 }]);
