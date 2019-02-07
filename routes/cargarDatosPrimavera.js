@@ -44,15 +44,17 @@ router.post('/', function(req, res, next) {
     
     run_main = async function(){
         try{
+            var err_global;
+            
             actividades_primavera = await getActividades(id_proyecto_primavera,req.session.usuario);
             if(actividades_primavera)
                 actividades_primavera = actividades_primavera.Activity;
             else{
-                var err = {
+                err_global = {
                     message: 'No activities found for this project.'
                 }
                 lugar_error = 'getActividadesP6';
-                throw err;
+                throw err_global;
             }
 
             smartsheet.sheets.getSheet(options)
@@ -104,30 +106,56 @@ router.post('/', function(req, res, next) {
                         }
                         else{
                             lugar_error = 'readingActivities';
-                            var error = {
+                            error_global = {
                                 message: 'Column Activity Id not found in Smartsheet'
                             }
-                            throw error;
+                            throw error_global;
                         }
                     });
                 });
-                //Ahora paso las actividades a la rutina que hace la insercion en primavera
-                primavera.updateActivities(actividades_enviar,req.session.usuario,function(err,result){
-                    if(err){
-                        lugar_error = 'updatingActivities';
-                        var error = {
-                            message: err.message
+                //Ahora paso las actividades a la rutina que hace la insercion en primavera 
+                              
+                primavera.updateActivities(actividades_enviar,req.session.usuario,function(error,result){
+                    try{ 
+                        if(error){
+                            lugar_error = 'updatingActivities';
+                            error_global = {
+                                message: error.message
+                            };
+                            throw error_global;
                         }
-                    }
-                    else{
-                        var result = {
-                            resultado: 'ok'
-                        } 
-                        res.send(result);
+                        else{
+                            var result = {
+                                resultado: 'ok'
+                            } 
+                            res.send(result);
+                        }
+                    } catch(err) {
+                        var descriptivo_error;
+                        var sugerencia;
+                        switch(lugar_error){
+                            case 'getActividadesP6': 
+                                descriptivo_error='There was an error while loading project information from Primavera.';
+                                sugerencia = 'Check if the project exists.';
+                                break;
+                        }
+                        var error = {
+                            resultado: 'error',
+                            descripcion: descriptivo_error,
+                            message: err.message,
+                            sugerencia: sugerencia
+                        }
+                        res.send(error);
                     }
                 });
+                
+                /*
+                if(error_global){
+                    throw error_global;
+                }
+                */
             })
-            .catch(function(err) {
+            .catch(function(errCatch) {
                 var descriptivo_error;
                 var sugerencia;
                 switch(lugar_error){
@@ -141,7 +169,7 @@ router.post('/', function(req, res, next) {
                 var error = {
                     resultado: 'error',
                     descripcion: descriptivo_error,
-                    message: err.message,
+                    message: errCatch.message,
                     sugerencia: sugerencia
                 }
                 res.send(error);
