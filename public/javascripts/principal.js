@@ -178,6 +178,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                             enlace.COLUMNA_SMARTSHEET = found.id;
                             enlace.ID_WORKFLOW = $scope.id_wf;
                             enlace.ID_HOJA_SMARTSHEET = wf.ID_HOJA_SMARTSHEET;
+                            enlace.ID_PROYECTO_PRIMAVERA = wf.ID_PROYECTO_PRIMAVERA;
                         }
                         index++;
                     });
