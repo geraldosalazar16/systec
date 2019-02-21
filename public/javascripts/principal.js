@@ -1255,7 +1255,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 $scope.mostrarFiltroActityCode = false;
             }
             //nombre == 'StartDate' || nombre == 'FinishDate' || nombre == 'ActualStartDate' || nombre == 'ActualFinishDate'
-            if(nombre.includes('Date') || nombre.includes('date')){
+            if((nombre.includes('Date') || nombre.includes('date')) && tipo_columna != 'udf'){
             
                 $scope.mostrarSelectFechas = true;
                 if($scope.tipo_filtro == 'Any'){
