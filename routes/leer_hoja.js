@@ -25,8 +25,8 @@ router.post('/', function(req, res, next) {
                 nombre: sheet.name,
                 accessLevel: sheet.accessLevel
             };
-            //Solo guardo las hojas en las que es owner
-            if(hoja.accessLevel == 'OWNER')
+            //Solo guardo las hojas en las que no es viewer
+            if(hoja.accessLevel != 'VIEWER')
             {
                 sheets.push(hoja);
             }
