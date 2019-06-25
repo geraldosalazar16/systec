@@ -249,7 +249,7 @@ userModel.validarUsuarioOAuth = function(userProfile,callback){
 }
 userModel.getColumnasP6 = function(callback){
     if(con){
-        var sql = "SELECT * FROM columnas_P6 where TIPO_WORKFLOW = 'PROYECTO'";
+        var sql = "SELECT * FROM columnas_p6 where TIPO_WORKFLOW = 'PROYECTO'";
         con.query(sql, function (err, result) {
             if (err) 
                 callback(err,null); 
@@ -261,7 +261,7 @@ userModel.getColumnasP6 = function(callback){
 }
 userModel.getColumnasP6P = function(callback){
     if(con){
-        var sql = "SELECT * FROM columnas_P6 where TIPO_WORKFLOW = 'PORTAFOLIO'";
+        var sql = "SELECT * FROM columnas_p6 where TIPO_WORKFLOW = 'PORTAFOLIO'";
         con.query(sql, function (err, result) {
             if (err) 
                 callback(err,null); 
