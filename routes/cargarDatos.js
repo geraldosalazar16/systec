@@ -118,6 +118,9 @@ router.post('/', function(req, res, next) {
                         else if(nombre_columna_p6.includes('Duration') || nombre_columna_p6.includes('duration')){
                             valor_columna_p6 = actividades[i][nombre_columna_p6]/factor_duracion;
                         }
+                        else if(nombre_columna_p6.includes('Percent') || nombre_columna_p6.includes('percent')){
+                            valor_columna_p6 = parseFloat(actividades[i][nombre_columna_p6]);
+                        }
                         else{
                             valor_columna_p6 = actividades[i][nombre_columna_p6];
                         }

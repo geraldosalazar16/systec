@@ -178,6 +178,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                             enlace.COLUMNA_SMARTSHEET = found.id;
                             enlace.ID_WORKFLOW = $scope.id_wf;
                             enlace.ID_HOJA_SMARTSHEET = wf.ID_HOJA_SMARTSHEET;
+                            enlace.ID_PROYECTO_PRIMAVERA = wf.ID_PROYECTO_PRIMAVERA;
                         }
                         index++;
                     });
@@ -1254,7 +1255,7 @@ app.controller('principal', ['$scope', '$http','$window','notify', function($sco
                 $scope.mostrarFiltroActityCode = false;
             }
             //nombre == 'StartDate' || nombre == 'FinishDate' || nombre == 'ActualStartDate' || nombre == 'ActualFinishDate'
-            if(nombre.includes('Date') || nombre.includes('date')){
+            if((nombre.includes('Date') || nombre.includes('date')) && tipo_columna != 'udf'){
             
                 $scope.mostrarSelectFechas = true;
                 if($scope.tipo_filtro == 'Any'){
